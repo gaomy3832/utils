@@ -2,6 +2,7 @@
 #define UTILS_BASIC_AL_H
 /*
  *   Basic arithmetic and logic operations.
+ *   from bithacks.h, https://github.com/s5z/zsim
  */
 #include <stdint.h>
 
