@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#include "sync.h"
+#include "threads.h"
 
 FILE* logFdErr = stderr;
 FILE* logFdOut = stdout;
@@ -18,8 +18,6 @@ void initLog(const char* header, const char* file) {
     char* logHdr = (char*)calloc(strlen(header) + 1, sizeof(char));
     strcpy(logHdr, header);
     logHeader = logHdr;
-
-    lock_init(&log_printLock);
 
     if (file) {
         FILE* fd = fopen(file, "a");
@@ -35,9 +33,9 @@ void initLog(const char* header, const char* file) {
 }
 
 void __log_lock() {
-    lock_acquire(&log_printLock);
+    log_printLock.lock();
 }
 
 void __log_unlock() {
-    lock_release(&log_printLock);
+    log_printLock.unlock();
 }
