@@ -1,8 +1,5 @@
-CXXFLAGS = -O3 -flto -Wall
+include make.inc
 
-LIB = libcommutils
-
-SRC_EXTS = .cpp .c
 SRCS = $(wildcard $(foreach EXT,$(SRC_EXTS),$(patsubst %,%/*$(EXT),.)))
 HEADERS = $(wildcard $(patsubst %,%/*.h,.))
 
@@ -21,4 +18,4 @@ $(LIB).a: $(SRCS:.cpp=.o)
 clean:
 	$(RM) -f *.o *~ *.a *.so
 
-
+.PHONY: clean
