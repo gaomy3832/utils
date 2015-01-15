@@ -15,7 +15,11 @@ $(LIB).a: $(SRCS:.cpp=.o)
 %.o: %.cpp %.h Makefile
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -fPIC -DPIC
 
+test: all
+	@$(MAKE) -C $(TEST_DIR) --no-print-directory
+
 clean:
+	@$(MAKE) -C $(TEST_DIR) clean --no-print-directory
 	$(RM) -f *.o *~ *.a *.so
 
-.PHONY: clean
+.PHONY: clean test
