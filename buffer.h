@@ -25,6 +25,7 @@ class Buffer {
 
         // Modifiers
         inline void reserve(size_t capacity);
+        void resize(size_t size);
         void append(const Byte* data, size_t size);
 
     private:
@@ -85,6 +86,11 @@ void Buffer::reserve(size_t capacity) {
         delete[] data_;
     }
     data_ = new_data;
+}
+
+void Buffer::resize(size_t size) {
+    reserve(size);
+    size_ = size;
 }
 
 void Buffer::append(const Byte* data, size_t size) {
