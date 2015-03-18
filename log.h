@@ -53,4 +53,29 @@ extern FILE* logFdOut;
     log_unlock(); \
 }
 
+#ifndef NASSERT
+#ifndef assert
+#define assert(expr) \
+if (!(expr)) { \
+    fprintf(logFdErr, "%sFailed assertion on %s:%d '%s'\n", logHeader, __FILE__, __LINE__, #expr); \
+    fflush(logFdErr); \
+    exit(PANIC_EXIT_CODE); \
+};
+#endif
+
+#define assert_msg(cond, ...) \
+if (!(cond)) { \
+    fprintf(logFdErr, "%sFailed assertion on %s:%d: ", logHeader, __FILE__, __LINE__); \
+    fprintf(logFdErr, __VA_ARGS__); \
+    fprintf(logFdErr, "\n"); \
+    fflush(logFdErr); \
+    exit(PANIC_EXIT_CODE); \
+};
+#else
+// Avoid unused warnings, never emit any code
+// see http://cnicholson.net/2009/02/stupid-c-tricks-adventures-in-assert/
+#define assert(cond) do { (void)sizeof(cond); } while (0);
+#define assert_msg(cond, ...) do { (void)sizeof(cond); } while (0);
+#endif
+
 #endif // UTILS_LOG_H
