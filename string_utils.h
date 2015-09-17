@@ -1,6 +1,8 @@
-#ifndef UTILS_STRING_HELPER_H
-#define UTILS_STRING_HELPER_H
-
+#ifndef UTILS_STRING_UTILS_H_
+#define UTILS_STRING_UTILS_H_
+/**
+ * String utilities.
+ */
 #include <vector>
 #include <string>
 using std::string;
@@ -26,5 +28,5 @@ inline void Tokenize(const string& str, vector<string>& tokens,
     }
 }
 
-#endif // UTILS_STRING_HELPER_H
+#endif // UTILS_STRING_UTILS_H_
 

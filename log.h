@@ -1,7 +1,7 @@
-#ifndef UTILS_LOG_H
-#define UTILS_LOG_H
-/*
- *   General logging/info/warn/panic routines.
+#ifndef UTILS_LOG_H_
+#define UTILS_LOG_H_
+/**
+ * General logging/info/warn/panic routines.
  */
 #include <stdlib.h>
 #include <stdio.h>
@@ -78,4 +78,5 @@ if (!(cond)) { \
 #define assert_msg(cond, ...) do { (void)sizeof(cond); } while (0);
 #endif
 
-#endif // UTILS_LOG_H
+#endif // UTILS_LOG_H_
+

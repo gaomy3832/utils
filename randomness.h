@@ -1,6 +1,8 @@
-#ifndef UTILS_RANDOMNESS_H
-#define UTILS_RANDOMNESS_H
-
+#ifndef UTILS_RANDOMNESS_H_
+#define UTILS_RANDOMNESS_H_
+/**
+ * Random number generator.
+ */
 #include <random>   // for std::mt19937, std::uniform_real_distribution
 
 template<typename Type>
@@ -22,5 +24,5 @@ class UniformRand {
         std::uniform_real_distribution<Type> dst_;
 };
 
-#endif // UTILS_RANDOMNESS_H
+#endif // UTILS_RANDOMNESS_H_
 

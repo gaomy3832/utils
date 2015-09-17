@@ -1,6 +1,8 @@
-#ifndef UTILS_STREAM_H
-#define UTILS_STREAM_H
-
+#ifndef UTILS_STREAM_H_
+#define UTILS_STREAM_H_
+/**
+ * Generic FIFO stream.
+ */
 #include <algorithm>    // for std::copy, std::sort
 #include <utility>      // for std::swap
 
@@ -132,5 +134,5 @@ void Stream<Data>::sort() {
     std::sort(stream_, stream_ + size_);
 }
 
-#endif // UTILS_STREAM_H
+#endif // UTILS_STREAM_H_
 

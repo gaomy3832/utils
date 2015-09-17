@@ -1,6 +1,3 @@
-/*
- *   General logging/info/warn/panic routines.
- */
 #include "log.h"
 #include <cstdlib>
 #include <cstdio>
@@ -39,3 +36,4 @@ void __log_lock() {
 void __log_unlock() {
     log_printLock.unlock();
 }
+

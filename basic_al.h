@@ -1,15 +1,14 @@
-#ifndef UTILS_BASIC_AL_H
-#define UTILS_BASIC_AL_H
-/*
- *   Basic arithmetic and logic operations.
- *   from bithacks.h, https://github.com/s5z/zsim
+#ifndef UTILS_BASIC_AL_H_
+#define UTILS_BASIC_AL_H_
+/**
+ * Basic arithmetic and logic operations.
+ * from zsim bithacks.h, https://github.com/s5z/zsim
  */
 #include <stdint.h>
 
-/* Assortment of efficient implementations for required, "bithack" operations, see the bithacks
- * website, http://graphics.stanford.edu/~seander/bithacks.html
+/* "Bithack" operations, see the bithacks website
+ * http://graphics.stanford.edu/~seander/bithacks.html
  */
-
 // Integer log2 --- called ilog2 because cmath defines log2 for floats/doubles,
 // and promotes int calls to use FP
 template<typename T> static inline uint32_t ilog2(T val);
@@ -26,8 +25,6 @@ template<typename T>
 static inline bool isPow2(T val) {
     return val && !(val & (val - 1));
 }
-
-
 
 /* Max and min: These work with side-effects, are type-safe, and gcc recognizes this pattern and uses
  * conditional moves (i.e., predication --> no unpredictable branches and great preformance)
@@ -57,5 +54,5 @@ template <typename T, typename U, typename ... V> static inline T minN(T a, U b,
     return minN(((a < b)? a : b), c...);
 }
 
+#endif // UTILS_BASIC_AL_H_
 
-#endif // UTILS_BASIC_AL_H

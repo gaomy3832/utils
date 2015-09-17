@@ -1,6 +1,8 @@
-#ifndef UTILS_BUFFER_H
-#define UTILS_BUFFER_H
-
+#ifndef UTILS_BUFFER_H_
+#define UTILS_BUFFER_H_
+/**
+ * Generic buffer to store raw bytes.
+ */
 #include <algorithm>    // for std::copy
 
 typedef uint8_t Byte;
@@ -99,5 +101,5 @@ void Buffer::append(const Byte* data, size_t size) {
     size_ += size;
 }
 
-#endif // UTILS_BUFFER_H
+#endif // UTILS_BUFFER_H_
 

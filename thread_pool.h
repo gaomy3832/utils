@@ -1,7 +1,7 @@
-#ifndef UTILS_THREAD_POOL_H
-#define UTILS_THREAD_POOL_H
-/*
- *   Thread pool.
+#ifndef UTILS_THREAD_POOL_H_
+#define UTILS_THREAD_POOL_H_
+/**
+ * Thread pool.
  */
 #include <queue>
 #include "log.h"
@@ -146,5 +146,5 @@ class ThreadPool {
         }
 };
 
-#endif // UTILS_THREAD_POOL_H
+#endif // UTILS_THREAD_POOL_H_
 

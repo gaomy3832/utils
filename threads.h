@@ -1,10 +1,10 @@
-#ifndef UTILS_THREADS_H
-#define UTILS_THREADS_H
-/*
- *   Wrappers for thread support routines,
- *   including thread manipulation and synchronization primitives.
+#ifndef UTILS_THREADS_H_
+#define UTILS_THREADS_H_
+/**
+ * Wrappers for thread support routines,
+ * including thread manipulation and synchronization primitives.
  *
- *   Use c++11 primitives and routines.
+ * Use c++11 primitives and routines.
  */
 #include <condition_variable>
 #include <mutex>
@@ -46,6 +46,5 @@ using cond_t = std::condition_variable;
  *  void notify_all();
  */
 
-
-#endif // UTILS_THREADS_H
+#endif // UTILS_THREADS_H_
 
