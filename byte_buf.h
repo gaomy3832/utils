@@ -1,5 +1,5 @@
-#ifndef UTILS_BUFFER_H_
-#define UTILS_BUFFER_H_
+#ifndef UTILS_BYTE_BUF_H_
+#define UTILS_BYTE_BUF_H_
 /**
  * Generic buffer to store raw bytes.
  */
@@ -7,30 +7,30 @@
 
 typedef uint8_t Byte;
 
-class Buffer {
+class ByteBuf {
     public:
-        Buffer() : buf(nullptr), sz(0), cap(0) {}
+        ByteBuf() : buf(nullptr), sz(0), cap(0) {}
 
-        Buffer(const Byte* data, size_t size) : Buffer() {
+        ByteBuf(const Byte* data, size_t size) : ByteBuf() {
             reserve(size);
             std::copy(data, data + size, buf);
             sz = size;
         }
 
-        ~Buffer() { delete[] buf; } // \c nullptr is safe
+        ~ByteBuf() { delete[] buf; } // \c nullptr is safe
 
         /* Copy and move */
 
-        Buffer(const Buffer&) = delete;
-        Buffer& operator=(const Buffer&) = delete;
+        ByteBuf(const ByteBuf&) = delete;
+        ByteBuf& operator=(const ByteBuf&) = delete;
 
-        Buffer(Buffer&& b) : buf(b.buf), sz(b.sz), cap(b.cap) {
+        ByteBuf(ByteBuf&& b) : buf(b.buf), sz(b.sz), cap(b.cap) {
             b.buf = nullptr;
             b.sz = 0;
             b.cap = 0;
         }
 
-        Buffer& operator=(Buffer&& b) {
+        ByteBuf& operator=(ByteBuf&& b) {
             // avoid self assign
             if (this == &b) return *this;
             // free current buf
@@ -89,5 +89,5 @@ class Buffer {
         size_t cap;
 };
 
-#endif // UTILS_BUFFER_H_
+#endif // UTILS_BYTE_BUF_H_
 

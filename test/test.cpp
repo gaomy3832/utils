@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include "buffer.h"
+#include "byte_buf.h"
 #include "stream.h"
 #include "log.h"
 
@@ -24,22 +24,22 @@ int main() {
 }
 
 void buffer_test() {
-    auto get_capacity = [](const Buffer* b) {
+    auto get_capacity = [](const ByteBuf* b) {
         uintptr_t p = reinterpret_cast<uintptr_t>(b);
         p += sizeof(Byte*) + sizeof(size_t);
         const size_t* pcap = reinterpret_cast<const size_t*>(p);
         return *pcap;
     };
 
-    Buffer* buffer;
+    ByteBuf* buffer;
 
     /*******************************************/
-    buffer = new Buffer();
+    buffer = new ByteBuf();
     assert(buffer->data() == nullptr && buffer->size() == 0);
     delete buffer;
 
     const unsigned char msg[] = "a very very long test message";
-    buffer = new Buffer(msg, 5);
+    buffer = new ByteBuf(msg, 5);
     assert(buffer->size() == 5 && get_capacity(buffer) == 8);
 
     /*******************************************/
@@ -74,7 +74,7 @@ void buffer_test() {
     std::copy(buffer->data(), buffer->data() + sz, ctx);
 
     // use move constructor
-    Buffer buffer2(std::move(*buffer));
+    ByteBuf buffer2(std::move(*buffer));
     assert(buffer->data() == nullptr && buffer->size() == 0 && get_capacity(buffer) == 0);
 
     *buffer = std::move(buffer2);
@@ -82,7 +82,7 @@ void buffer_test() {
             && std::equal(ctx, ctx + sz, buffer->data()));
 
     // use move assignment
-    buffer2 = Buffer(msg, 2);
+    buffer2 = ByteBuf(msg, 2);
     buffer2 = std::move(*buffer);
     *buffer = std::move(buffer2);
     assert(cap == get_capacity(buffer) && sz == buffer->size()
@@ -91,11 +91,11 @@ void buffer_test() {
 
     /*******************************************/
     // copy, should be prohibited
-    //Buffer buffer3 = *buffer;
+    //ByteBuf buffer3 = *buffer;
 
     /*******************************************/
     delete buffer;
-    std::cout << "Simple test on class Buffer succeeds!" << std::endl;
+    std::cout << "Simple test on class ByteBuf succeeds!" << std::endl;
 }
 
 void stream_test() {
