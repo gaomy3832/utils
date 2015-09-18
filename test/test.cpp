@@ -1,14 +1,24 @@
+#include <algorithm>
 #include <cassert>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include "buffer.h"
 #include "stream.h"
+#include "log.h"
 
 void buffer_test();
 void stream_test();
+void logger_test();
 
 int main() {
+    std::cout << std::endl;
     buffer_test();
+    std::cout << std::endl;
     stream_test();
+    std::cout << std::endl;
+    logger_test();
+    std::cout << std::endl;
 
     return 0;
 }
@@ -192,5 +202,29 @@ void stream_test() {
     std::cout << "Simple test on class Stream succeeds!" << std::endl;
 }
 
+void logger_test() {
+    std::cout << "Message: \"This is a test, 12345.\"" << std::endl;
+
+    std::cout << "Basic info and warn:" << std::endl;
+    info("This is a %s, %d.", "test", 12345);
+    warn("This is a %s, %d.", "test", 12345);
+
+    std::cout << "To file, with header [TEST]:" << std::endl;
+    const char* fname = "/tmp/logger_test.txt";
+    Logger l("[TEST]", fname);
+    l.log_info("This is a %s, %d.", "test", 12345);
+    l.log_warn("This is a %s, %d.", "test", 12345);
+    std::cout << "File content:" << std::endl;
+    std::ifstream ifh(fname);
+    // http://stackoverflow.com/questions/675953/how-to-print-an-entire-istream-to-standard-out-and-string
+    // use i/ostreambuf_iterator to retain whitespaces
+    std::copy(std::istreambuf_iterator<char>(ifh), std::istreambuf_iterator<char>(),
+            std::ostreambuf_iterator<char>(std::cout));
+    ifh.close();
+    int status = remove(fname);
+    if (status) panic("Clean up test file fails!");
+
+    std::cout << "Simple test on logger succeeds!" << std::endl;
+}
 
 
