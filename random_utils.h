@@ -1,5 +1,5 @@
-#ifndef UTILS_RANDOMNESS_H_
-#define UTILS_RANDOMNESS_H_
+#ifndef UTILS_RANDOM_UTILS_H_
+#define UTILS_RANDOM_UTILS_H_
 /**
  * Random number generator.
  */
@@ -24,5 +24,5 @@ class UniformRand {
         std::uniform_real_distribution<Type> dst_;
 };
 
-#endif // UTILS_RANDOMNESS_H_
+#endif // UTILS_RANDOM_UTILS_H_
 
