@@ -48,7 +48,8 @@ class ByteBuf {
 
         /* Member access */
 
-        Byte* data() const { return buf; }
+        const Byte* data() const { return buf; }
+        Byte* data() { return buf; }
         size_t size() const { return sz; }
 
         /* Modifiers */
