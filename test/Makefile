@@ -12,7 +12,7 @@ test: test.o
 	$(CXX) $^ -o $@ $(CXXFLAGS)
 
 %.o: %.cpp
-	$(CXX) $< -c -o $@ $(CXXFLAGS) -I.. -fPIC -DPIC -MP -MMD
+	$(CXX) $< -c -o $@ $(CXXFLAGS) -I../include -fPIC -DPIC -MP -MMD
 
 clean:
 	$(RM) -f *.o *.d *~ test
