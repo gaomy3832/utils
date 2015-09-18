@@ -114,16 +114,15 @@ void stream_test() {
 
     auto get_capacity = [](const stream_t* s) {
         uintptr_t p = reinterpret_cast<uintptr_t>(s);
-        p += sizeof(Data*) + sizeof(size_t);
-        const size_t* pcap = reinterpret_cast<const size_t*>(p);
-        return *pcap;
+        auto* pstrm = reinterpret_cast<std::vector<Data>*>(p);
+        return pstrm->capacity();
     };
 
     stream_t* stream;
 
     /*******************************************/
     stream = new stream_t(0);
-    assert(stream->stream() == nullptr && stream->size() == 0);
+    assert(stream->data() == nullptr && stream->size() == 0);
     delete stream;
 
     stream = new stream_t(1024);
@@ -156,22 +155,22 @@ void stream_test() {
     cap = get_capacity(stream);
     sz = stream->size();
     Data* ctx = new Data[sz];
-    std::copy(stream->stream(), stream->stream() + sz, ctx);
+    std::copy(stream->data(), stream->data() + sz, ctx);
 
     // use move constructor
     stream_t stream2(std::move(*stream));
-    assert(stream->stream() == nullptr && stream->size() == 0 && get_capacity(stream) == 0);
+    assert(stream->data() == nullptr && stream->size() == 0 && get_capacity(stream) == 0);
 
     *stream = std::move(stream2);
     assert(cap == get_capacity(stream) && sz == stream->size()
-            && std::equal(ctx, ctx + sz, stream->stream()));
+            && std::equal(ctx, ctx + sz, stream->data()));
 
     // use move assignment
     stream2 = stream_t();
     stream2 = std::move(*stream);
     *stream = std::move(stream2);
     assert(cap == get_capacity(stream) && sz == stream->size()
-            && std::equal(ctx, ctx + sz, stream->stream()));
+            && std::equal(ctx, ctx + sz, stream->data()));
 
     /*******************************************/
     // copy, should be prohibited
@@ -185,7 +184,7 @@ void stream_test() {
     stream_t stream4;
     stream->swap(stream4);
     assert(stream4.size() == sz && get_capacity(&stream4) == cap
-            && std::equal(ctx, ctx + sz, stream4.stream()));
+            && std::equal(ctx, ctx + sz, stream4.data()));
     delete[] ctx;
 
     /*******************************************/

@@ -2,137 +2,71 @@
 #define UTILS_STREAM_H_
 /**
  * Generic FIFO stream.
+ *
+ * Implemented by std::vector.
  */
-#include <algorithm>    // for std::copy, std::sort
-#include <utility>      // for std::swap
+#include <algorithm>    // for std::sort
+#include <vector>
 
 template <typename Data>
 class Stream {
     public:
-        Stream(size_t cp = 256);
-        ~Stream();
+        Stream(size_t num = 16) {
+            stream.reserve(num);
+        }
 
-        // Move
-        Stream(Stream<Data>&& s);
-        Stream<Data>& operator=(Stream<Data>&& s);
+        ~Stream() {}
 
-        // No copy
+        /* Copy and move */
+
         Stream(const Stream<Data>&) = delete;
         Stream<Data>& operator=(const Stream<Data>&) = delete;
 
-        // Member access
-        Data* stream() const { return stream_; }
-        size_t size() const { return size_; }
-        size_t byte_size() const { return size_ * sizeof(Data); }
+        Stream(Stream<Data>&& s) { stream.swap(s.stream); }
+        Stream<Data>& operator=(Stream<Data>&& s) {
+            // avoid self assign
+            if (this == &s) return *this;
+            stream.swap(s.stream);
+            return *this;
+        }
 
-        Data& operator[](size_t idx) { return stream_[idx]; }
-        const Data& operator[](size_t idx) const { return stream_[idx]; }
+        /* Member access */
 
-        // Modifiers
-        void reset(size_t cp = 256);
-        void swap(Stream<Data>& s);
-        void put(const Data& d);
-        void sort();
+        const Data* data() const { return stream.data(); }
+        Data* data() { return stream.data(); }
+        size_t size() const { return stream.size(); }
+        size_t byte_size() const { return size() * sizeof(Data); }
 
-    private:
-        inline void extend(size_t factor = 2) {
-            // \c capacity_ starts from 4
-            if (capacity_ < 4) capacity_ = 4;
-            // extend \c capacity_ by \c factor
-            capacity_ *= factor;
-            // allocate space
-            Data* new_stream = new Data[capacity_];
-            // copy stream
-            if (stream_ != nullptr) {
-                std::copy(stream_, stream_ + size_, new_stream);
-                delete[] stream_;
-            }
-            stream_ = new_stream;
+        Data& operator[](size_t idx) { return stream[idx]; }
+        const Data& operator[](size_t idx) const { return stream[idx]; }
+
+        /* Modifiers */
+
+        void reset(size_t num = 16) {
+            decltype(stream) temp;
+            temp.reserve(num);
+            // use swap to set the capacity, others do not guarantee to shrink
+            // to the exact capacity.
+            stream.swap(temp);
+        }
+
+        void swap(Stream<Data>& s) {
+            stream.swap(s.stream);
+        }
+
+        void put(const Data& d) {
+            // The growth of the STL vector is implementation dependent, but it
+            // usually grows exponentially as a nearly-optimal solution.
+            stream.push_back(d);
+        }
+
+        void sort() {
+            std::sort(stream.begin(), stream.end());
         }
 
     private:
-        // Implemented in sequential storage
-        Data* stream_;
-        size_t size_;
-        size_t capacity_;
+        std::vector<Data> stream;
 };
-
-/*
- * Implementation
- */
-template <typename Data>
-Stream<Data>::Stream(size_t cp) {
-    if (cp == 0) {
-        stream_ = nullptr;
-        size_ = 0;
-        capacity_ = 0;
-    } else {
-        capacity_ = cp;
-        stream_ = new Data[capacity_];
-        size_ = 0;
-    }
-}
-
-template <typename Data>
-Stream<Data>::~Stream() {
-    // delete nullptr is safe (3.7.4.2/3)
-    delete[] stream_;
-}
-
-template <typename Data>
-Stream<Data>::Stream(Stream<Data>&& s)
-    : stream_{s.stream_}, size_{s.size_}, capacity_{s.capacity_}
-{
-    s.stream_ = nullptr;
-    s.size_ = 0;
-    s.capacity_ = 0;
-}
-
-template <typename Data>
-Stream<Data>& Stream<Data>::operator=(Stream<Data>&& s) {
-    // avoid self assign
-    if (this != &s) {
-        // free current stream
-        delete[] stream_;
-        // assign
-        stream_ = s.stream_;
-        size_ = s.size_;
-        capacity_ = s.capacity_;
-        // release the source
-        s.stream_ = nullptr;
-        s.size_ = 0;
-        s.capacity_ = 0;
-    }
-    return *this;
-}
-
-template <typename Data>
-void Stream<Data>::reset(size_t cp) {
-    delete[] stream_;
-    capacity_ = cp;
-    stream_ = new Data[capacity_];
-    size_ = 0;
-}
-
-template <typename Data>
-void Stream<Data>::swap(Stream<Data>& s) {
-    std::swap(stream_, s.stream_);
-    std::swap(size_, s.size_);
-    std::swap(capacity_, s.capacity_);
-}
-
-template <typename Data>
-void Stream<Data>::put(const Data& d) {
-    if (size_ == capacity_) {
-        extend();
-    }
-    stream_[size_++] = d;
-}
-
-template <typename Data>
-void Stream<Data>::sort() {
-    std::sort(stream_, stream_ + size_);
-}
 
 #endif // UTILS_STREAM_H_
 
