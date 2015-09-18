@@ -1,30 +1,19 @@
 #ifndef UTILS_LOG_H_
 #define UTILS_LOG_H_
 /**
- * General logging/info/warn/panic routines.
+ * Generic logging/info/warn/panic routines.
  */
-#include <stdlib.h>
-#include <stdio.h>
-
-void initLog(const char* header = NULL, const char* file = NULL);
-void __log_lock();
-void __log_unlock();
-
-#ifdef MT_SAFE_LOG
-#define log_lock() __log_lock()
-#define log_unlock() __log_unlock()
-#else
-#define log_lock()
-#define log_unlock()
-#endif
-
-extern const char* logHeader;
-extern FILE* logFdErr;
-extern FILE* logFdOut;
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <mutex>
 
 #define PANIC_EXIT_CODE (112)
 
-#define panic(...) \
+/* Logging */
+
+// Generic logging, thread-unsafe
+#define __panic(logFdErr, logHeader, ...) \
 { \
     fprintf(logFdErr, "%sPanic on %s:%d: ", logHeader, __FILE__, __LINE__); \
     fprintf(logFdErr, __VA_ARGS__); \
@@ -33,50 +22,110 @@ extern FILE* logFdOut;
     exit(PANIC_EXIT_CODE); \
 }
 
-#define warn(...) \
+#define __warn(logFdErr, logHeader, ...) \
 { \
-    log_lock(); \
     fprintf(logFdErr, "%sWARN: ", logHeader); \
     fprintf(logFdErr, __VA_ARGS__); \
     fprintf(logFdErr, "\n"); \
     fflush(logFdErr); \
-    log_unlock(); \
 }
 
-#define info(...) \
+#define __info(logFdOut, logHeader, ...) \
 { \
-    log_lock(); \
     fprintf(logFdOut, "%s", logHeader); \
     fprintf(logFdOut, __VA_ARGS__); \
     fprintf(logFdOut, "\n"); \
     fflush(logFdOut); \
-    log_unlock(); \
 }
 
+// Basic logging, thread-unsafe, print to stdout/stderr, no header
+#define panic(...) __panic(stderr, "", __VA_ARGS__)
+#define warn(...)  __warn(stderr, "", __VA_ARGS__)
+#define info(...)  __info(stdout, "", __VA_ARGS__)
+
+// Logging class, thread-safe, support redirection to files, support header
+class Logger {
+    public:
+        Logger(const char* header = "", const char* file = nullptr) : logHeader(header) {
+            if (file) {
+                fd = fopen(file, "a");
+                if (fd == NULL) {
+                    perror("fopen() failed");
+                    // We can panic in InitLog (will dump to stderr)
+                    panic("Could not open logfile %s", file);
+                }
+                logFdOut = fd;
+                logFdErr = fd;
+            } else {
+                fd = nullptr;
+                logFdOut = stdout;
+                logFdErr = stderr;
+            }
+        }
+
+        ~Logger() {
+            fclose(fd);
+        }
+
+        template<typename... Args>
+        void log_panic(const char* fmt, Args... args) {
+            __panic(logFdErr, logHeader.c_str(), fmt, args...);
+        }
+
+        template<typename... Args>
+        void log_warn(const char* fmt, Args... args) {
+            logPrintLock.lock();
+            __warn(logFdErr, logHeader.c_str(), fmt, args...);
+            logPrintLock.unlock();
+        }
+
+        template<typename... Args>
+        void log_info(const char* fmt, Args... args) {
+            logPrintLock.lock();
+            __info(logFdErr, logHeader.c_str(), fmt, args...);
+            logPrintLock.unlock();
+        }
+
+    private:
+        FILE* fd;
+        FILE* logFdErr;
+        FILE* logFdOut;
+        const std::string logHeader;
+        std::mutex logPrintLock;
+};
+
+
+/* Assertion */
+
 #ifndef NASSERT
+
 #ifndef assert
 #define assert(expr) \
 if (!(expr)) { \
-    fprintf(logFdErr, "%sFailed assertion on %s:%d '%s'\n", logHeader, __FILE__, __LINE__, #expr); \
-    fflush(logFdErr); \
+    fprintf(stderr, "%sFailed assertion on %s:%d '%s'\n", "", __FILE__, __LINE__, #expr); \
+    fflush(stderr); \
     exit(PANIC_EXIT_CODE); \
 };
 #endif
 
 #define assert_msg(cond, ...) \
 if (!(cond)) { \
-    fprintf(logFdErr, "%sFailed assertion on %s:%d: ", logHeader, __FILE__, __LINE__); \
-    fprintf(logFdErr, __VA_ARGS__); \
-    fprintf(logFdErr, "\n"); \
-    fflush(logFdErr); \
+    fprintf(stderr, "%sFailed assertion on %s:%d: ", "", __FILE__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__); \
+    fprintf(stderr, "\n"); \
+    fflush(stderr); \
     exit(PANIC_EXIT_CODE); \
 };
-#else
+
+#else // NASSERT
+
 // Avoid unused warnings, never emit any code
 // see http://cnicholson.net/2009/02/stupid-c-tricks-adventures-in-assert/
 #define assert(cond) do { (void)sizeof(cond); } while (0);
 #define assert_msg(cond, ...) do { (void)sizeof(cond); } while (0);
-#endif
+
+#endif // NASSERT
+
 
 #endif // UTILS_LOG_H_
 

@@ -1,4 +1,7 @@
 utils
 =====
 
-Common utilities for c/c++ coding.
+*Mingyu Gao*
+
+Common header-only utilities for c/c++ coding.
+
