@@ -64,14 +64,14 @@ class TaskQueue {
 
 class ThreadPool {
     public:
-        typedef uint32_t TID;
-        static const TID INV_TID = ((uint32_t)-1);
+        typedef uint32_t tid_t;
+        static const tid_t INV_TID = ((uint32_t)-1);
 
         ThreadPool(uint32_t num_workers) :
             num_workers_(num_workers), queues_(num_workers_),
             num_tasks_(0), cur_worker_(0) {
 
-            for (TID tid = 0; tid < num_workers_; tid++) {
+            for (tid_t tid = 0; tid < num_workers_; tid++) {
                 workers_.emplace_back(&ThreadPool::worker_func, this, tid);
             }
         }
@@ -92,7 +92,7 @@ class ThreadPool {
         ThreadPool(const ThreadPool&) = delete;
         ThreadPool& operator=(const ThreadPool&) = delete;
 
-        void add_task(const TaskType& task, TID tid = INV_TID) {
+        void add_task(const TaskType& task, tid_t tid = INV_TID) {
             if (tid == INV_TID) {
                 tid = next_worker();
             }
@@ -122,15 +122,15 @@ class ThreadPool {
         uint32_t num_tasks_;
 
         // For task assignment
-        TID cur_worker_;
+        tid_t cur_worker_;
 
     private:
 
-        TID next_worker() {
+        tid_t next_worker() {
             return cur_worker_ = (cur_worker_ + 1) % num_workers_;
         }
 
-        void worker_func(TID tid) {
+        void worker_func(tid_t tid) {
             while (true) {
                 TaskType task = queues_[tid].dequeue();
                 if (!task) return;
