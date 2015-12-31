@@ -1,5 +1,5 @@
-CXXFLAGS = -g -O0 -fno-inline -Wall -std=c++11
-#CXXFLAGS = -O3 -flto -Wall -std=c++11
+CXXFLAGS = -g -O0 -fno-inline -Wall -std=c++11 -pthread
+#CXXFLAGS = -O3 -flto -Wall -std=c++11 -pthread
 
 all: test run
 

@@ -6,10 +6,12 @@
 #include "byte_buf.h"
 #include "stream.h"
 #include "log.h"
+#include "threads.h"
 
 void buffer_test();
 void stream_test();
 void logger_test();
+void threads_test();
 
 int main() {
     std::cout << std::endl;
@@ -18,6 +20,8 @@ int main() {
     stream_test();
     std::cout << std::endl;
     logger_test();
+    std::cout << std::endl;
+    threads_test();
     std::cout << std::endl;
 
     return 0;
@@ -226,4 +230,23 @@ void logger_test() {
     std::cout << "Simple test on logger succeeds!" << std::endl;
 }
 
+void threads_test() {
+    std::vector<thread_t> threads;
+    constexpr uint32_t cnt = 8;
+    bar_t bar(cnt);
+    auto threadFunc = [&bar](uint32_t idx){
+        for (uint32_t iter = 0; iter < 4; iter++) {
+            info("%u: In iteration %u", idx, iter);
+            bar.wait();
+        }
+    };
+    for (uint32_t idx = 0; idx < cnt; idx++) {
+        threads.emplace_back(threadFunc, idx);
+    }
+    for (uint32_t idx = 0; idx < cnt; idx++) {
+        threads[idx].join();
+    }
+
+    std::cout << "Simple test on threads succeeds!" << std::endl;
+}
 
