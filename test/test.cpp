@@ -7,6 +7,7 @@
 #include "stream.h"
 #include "log.h"
 #include "threads.h"
+#include "thread_pool.h"
 
 void buffer_test();
 void stream_test();
@@ -234,6 +235,8 @@ void threads_test() {
     std::vector<thread_t> threads;
     constexpr uint32_t cnt = 8;
     bar_t bar(cnt);
+
+    std::cout << "Test thread barrier:" << std::endl;
     auto threadFunc = [&bar](uint32_t idx){
         for (uint32_t iter = 0; iter < 4; iter++) {
             info("%u: In iteration %u", idx, iter);
@@ -246,6 +249,13 @@ void threads_test() {
     for (uint32_t idx = 0; idx < cnt; idx++) {
         threads[idx].join();
     }
+
+    std::cout << "Test thread pool:" << std::endl;
+    ThreadPool pool(cnt);
+    for (uint32_t idx = 0; idx < cnt; idx++) {
+        pool.add_task(std::bind(threadFunc, idx));
+    }
+    pool.wait_all();
 
     std::cout << "Simple test on threads succeeds!" << std::endl;
 }
