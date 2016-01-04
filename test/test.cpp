@@ -257,6 +257,17 @@ void threads_test() {
     }
     pool.wait_all();
 
+    std::cout << "Test thread barrier callback:" << std::endl;
+    auto threadFuncCallback = [&bar](uint32_t idx){
+        for (uint32_t iter = 0; iter < 4; iter++) {
+            bar.wait([iter](){ info("Serial point %u", iter); });
+        }
+    };
+    for (uint32_t idx = 0; idx < cnt; idx++) {
+        pool.add_task(std::bind(threadFuncCallback, idx));
+    }
+    pool.wait_all();
+
     std::cout << "Simple test on threads succeeds!" << std::endl;
 }
 
