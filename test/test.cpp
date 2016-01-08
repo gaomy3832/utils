@@ -202,6 +202,18 @@ void stream_test() {
     }
 
     /*******************************************/
+    // iterator and const iterator
+    for (auto& d : stream4) {
+        d.a = d.a + 1;
+        d.b = d.b + 1;
+    }
+    auto dd = Data{0, 0};
+    for (const auto& d : stream4) {
+        assert(dd < d);
+        dd = d;
+    }
+
+    /*******************************************/
     delete stream;
     std::cout << "Simple test on class Stream succeeds!" << std::endl;
 }
