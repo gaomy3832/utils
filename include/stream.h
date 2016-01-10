@@ -47,8 +47,11 @@ class Stream {
         StreamIter begin() { return stream.begin(); }
         StreamIter end() { return stream.end(); }
 
-        StreamConstIter cbegin() { return stream.cbegin(); }
-        StreamConstIter cend() { return stream.cend(); }
+        StreamConstIter begin() const { return stream.begin(); }
+        StreamConstIter end() const { return stream.end(); }
+
+        StreamConstIter cbegin() const { return stream.cbegin(); }
+        StreamConstIter cend() const { return stream.cend(); }
 
         /* Modifiers */
 
