@@ -69,7 +69,8 @@ public:
 
 class InvalidArgumentException : public Exception {
 public:
-    explicit InvalidArgumentException(const std::string& str) : Exception(str) {}
+    explicit InvalidArgumentException(const std::string& str)
+        : Exception(str) {}
 };
 
 class TimeoutException : public Exception {
@@ -82,4 +83,4 @@ public:
     explicit InternalException(const std::string& str) : Exception(str) {}
 };
 
-#endif // UTILS_EXCEPTION_H_
+#endif  // UTILS_EXCEPTION_H_
