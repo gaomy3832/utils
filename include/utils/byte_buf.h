@@ -8,87 +8,138 @@
 typedef uint8_t Byte;
 
 class ByteBuf {
-    public:
-        ByteBuf() : buf(nullptr), sz(0), cap(0) {}
+public:
+    /**
+     * Initialize empty buffer.
+     */
+    ByteBuf()
+            : buffer(nullptr), size(0), capacity(0) {
+        // Nothing else to do.
+    }
 
-        ByteBuf(const Byte* data, size_t size) : ByteBuf() {
-            reserve(size);
-            std::copy(data, data + size, buf);
-            sz = size;
-        }
+    /**
+     * Initialize buffer with data.
+     */
+    ByteBuf(const Byte* data, size_t sz)
+            : ByteBuf() {
+        reserve(sz);
+        std::copy(data, data + sz, buffer);
+        size = sz;
+    }
 
-        ~ByteBuf() { delete[] buf; } // \c nullptr is safe
+    ~ByteBuf() {
+        delete[] buffer;  // nullptr is safe.
+    }
 
-        /* Copy and move */
+    /* Copy and move. */
 
-        ByteBuf(const ByteBuf&) = delete;
-        ByteBuf& operator=(const ByteBuf&) = delete;
+    ByteBuf(const ByteBuf&) = delete;
 
-        ByteBuf(ByteBuf&& b) : buf(b.buf), sz(b.sz), cap(b.cap) {
-            b.buf = nullptr;
-            b.sz = 0;
-            b.cap = 0;
-        }
+    ByteBuf& operator=(const ByteBuf&) = delete;
 
-        ByteBuf& operator=(ByteBuf&& b) {
-            // avoid self assign
-            if (this == &b) return *this;
-            // free current buf
-            delete[] buf;
-            // assign
-            buf = b.buf;
-            sz = b.sz;
-            cap = b.cap;
-            // release the source
-            b.buf = nullptr;
-            b.sz = 0;
-            b.cap = 0;
-            return *this;
-        }
+    /**
+     * Move constructor.
+     */
+    ByteBuf(ByteBuf&& b)
+            : buffer(b.buffer), size(b.size), capacity(b.capacity) {
+        b.buffer = nullptr;
+        b.size = 0;
+        b.capacity = 0;
+    }
 
-        /* Member access */
+    /**
+     * Move assignment.
+     */
+    ByteBuf& operator=(ByteBuf&& b) {
+        // Avoid self assign.
+        if (this == &b) return *this;
+        // Free current buffer.
+        delete[] buffer;
+        // Assign.
+        buffer = b.buffer;
+        size = b.size;
+        capacity = b.capacity;
+        // Release the source.
+        b.buffer = nullptr;
+        b.size = 0;
+        b.capacity = 0;
+        return *this;
+    }
 
-        const Byte* data() const { return buf; }
-        Byte* data() { return buf; }
-        size_t size() const { return sz; }
+    /* Member access */
 
-        /* Modifiers */
+    /**
+     * Get raw pointer to the data.
+     */
+    Byte* data() { return buffer; }
 
-        void reserve(size_t capacity) {
-            // only grow buf
-            if (capacity <= cap) return;
-            // \c cap is always power of 2
-            cap = 1;
-            while (cap < capacity) cap <<= 1;
-            // store old buf
-            auto* old_buf = buf;
-            // allocate buf
-            buf = new Byte[cap];
-            // copy buf
-            std::copy(old_buf, old_buf + sz, buf);
-            // delete old buf, \c nullptr is safe
-            delete[] old_buf;
-        }
+    /**
+     * Get const raw pointer to the data.
+     */
+    const Byte* data() const { return buffer; }
 
-        void resize(size_t size) {
-            reserve(size);
-            sz = size;
-        }
+    /**
+     * Get buffer size in bytes.
+     */
+    size_t size() const { return size; }
 
-        void append(const Byte* data, size_t size) {
-            reserve(sz + size);
-            std::copy(data, data + size, buf + sz);
-            sz += size;
-        }
+    /* Modifiers */
 
-    private:
-        // data space
-        Byte* buf;
-        // used size
-        size_t sz;
-        // allocated capacity
-        size_t cap;
+    /**
+     * Reserve at least \c cap bytes for the buffer. Keep original data.
+     */
+    void reserve(size_t cap) {
+        // Only grow buffer.
+        if (cap <= capacity) return;
+        // Capacity is always power of 2.
+        capacity = 1;
+        while (capacity < cap) capacity <<= 1;
+        // Store old buffer.
+        auto* obuf = buffer;
+        // Allocate buffer.
+        buffer = new Byte[capacity];
+        // Copy buffer.
+        std::copy(obuf, obuf + size, buffer);
+        // Delete old buffer, nullptr is safe.
+        delete[] obuf;
+    }
+
+    /**
+     * Resize buffer.
+     */
+    void resize(size_t sz) {
+        reserve(sz);
+        size = sz;
+    }
+
+    /**
+     * Append more data to the buffer.
+     *
+     * @param data  data pointer to be appended.
+     * @param sz    size of data to be appended.
+     */
+    void append(const Byte* data, size_t sz) {
+        reserve(size + sz);
+        std::copy(data, data + sz, buffer + size);
+        size += sz;
+    }
+
+private:
+    /**
+     * Buffer space.
+     */
+    Byte* buffer;
+
+    /**
+     * Used size of buffer.
+     */
+    size_t size;
+
+    /**
+     * Allocated capacity of buffer.
+     */
+    size_t capacity;
 };
 
-#endif // UTILS_BYTE_BUF_H_
+#endif  // UTILS_BYTE_BUF_H_
 
