@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016 Mingyu Gao
+ *
+ */
 #ifndef UTILS_LOG_H_
 #define UTILS_LOG_H_
 /**

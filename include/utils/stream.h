@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016 Mingyu Gao
+ *
+ */
 #ifndef UTILS_STREAM_H_
 #define UTILS_STREAM_H_
 /**

@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016 Mingyu Gao
+ *
+ */
 #ifndef UTILS_STRING_UTILS_H_
 #define UTILS_STRING_UTILS_H_
 /**

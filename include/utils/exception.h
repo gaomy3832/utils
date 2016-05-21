@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016 Mingyu Gao
+ *
+ */
 #ifndef UTILS_EXCEPTION_H_
 #define UTILS_EXCEPTION_H_
 /**

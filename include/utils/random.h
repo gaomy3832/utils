@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016 Mingyu Gao
+ *
+ */
 #ifndef UTILS_RANDOM_H_
 #define UTILS_RANDOM_H_
 /**

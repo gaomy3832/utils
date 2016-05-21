@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016 Mingyu Gao
+ *
+ */
 #ifndef UTILS_THREAD_H_
 #define UTILS_THREAD_H_
 /**

@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016 Mingyu Gao
+ *
+ */
 #ifndef UTILS_ARITH_LOGIC_H_
 #define UTILS_ARITH_LOGIC_H_
 /**

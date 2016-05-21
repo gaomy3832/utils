@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016 Mingyu Gao
+ *
+ */
 #ifndef UTILS_BYTE_BUF_H_
 #define UTILS_BYTE_BUF_H_
 /**
