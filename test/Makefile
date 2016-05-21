@@ -1,6 +1,7 @@
 PROGS = \
 	   arith_logic_test \
 	   exception_test \
+	   string_utils_test \
 
 
 BINDIR = bin
