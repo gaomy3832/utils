@@ -1,5 +1,5 @@
-#ifndef UTILS_THREADS_H_
-#define UTILS_THREADS_H_
+#ifndef UTILS_THREAD_H_
+#define UTILS_THREAD_H_
 /**
  * Wrappers for thread support routines,
  * including thread manipulation and synchronization primitives.
@@ -268,5 +268,5 @@ private:
     }
 };
 
-#endif  // UTILS_THREADS_H_
+#endif  // UTILS_THREAD_H_
 
