@@ -1,5 +1,6 @@
 PROGS = \
 	   arith_logic_test \
+	   exception_test \
 
 
 BINDIR = bin
