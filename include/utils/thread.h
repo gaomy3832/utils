@@ -143,11 +143,11 @@ public:
     void enqueue(const task_t& task) {
         mutex_begin(uqlk, lock);
         if (stop) {
-            throw std::PermissionException(
+            throw PermissionException(
                     "TaskQueue: enqueue on stopped task queue!");
         }
         if (!task) {
-            throw std::InvalidArgumentException(
+            throw InvalidArgumentException(
                     "TaskQueue: enqueue empty task!");
         }
         queue.push(task);

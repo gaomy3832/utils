@@ -13,8 +13,8 @@
 
 class Random {
 public:
-    typedef IntType uint64_t;
-    typedef RealType double;
+    typedef uint64_t IntType;
+    typedef double RealType;
 
 public:
     explicit Random(uint64_t seed)
@@ -36,7 +36,7 @@ public:
         if (max == min) return min;
         auto r = getInteger();
         auto span = max - min;
-        if (span == std::numerical_limits<IntType>::max())
+        if (span == std::numeric_limits<IntType>::max())
             return r;
         else
             return min + r % (span + 1);
