@@ -26,7 +26,7 @@ public:
      * @param num    initial number of elements.
      */
     explicit Stream(size_t num = 16) {
-        stream.reserve(num);
+        stream_.reserve(num);
     }
 
     ~Stream() {}
@@ -41,7 +41,7 @@ public:
      * Move constructor.
      */
     Stream(Stream<Data>&& s) {
-        stream.swap(s.stream);
+        stream_.swap(s.stream_);
     }
 
     /**
@@ -50,7 +50,7 @@ public:
     Stream<Data>& operator=(Stream<Data>&& s) {
         // Avoid self assign.
         if (this == &s) return *this;
-        stream.swap(s.stream);
+        stream_.swap(s.stream_);
         return *this;
     }
 
@@ -59,17 +59,17 @@ public:
     /**
      * Get raw pointer to the data.
      */
-    Data* data() { return stream.data(); }
+    Data* data() { return stream_.data(); }
 
     /**
      * Get const raw pointer to the data.
      */
-    const Data* data() const { return stream.data(); }
+    const Data* data() const { return stream_.data(); }
 
     /**
      * Get stream size in number of elements.
      */
-    size_t size() const { return stream.size(); }
+    size_t size() const { return stream_.size(); }
 
     /**
      * Get stream size in bytes.
@@ -79,42 +79,42 @@ public:
     /**
      * Get element with index \c idx.
      */
-    Data& operator[](size_t idx) { return stream[idx]; }
+    Data& operator[](size_t idx) { return stream_[idx]; }
 
     /**
      * Get const element with index \c idx.
      */
-    const Data& operator[](size_t idx) const { return stream[idx]; }
+    const Data& operator[](size_t idx) const { return stream_[idx]; }
 
     /**
      * Get iterator to the elements in the stream.
      */
-    StreamIter begin() { return stream.begin(); }
+    StreamIter begin() { return stream_.begin(); }
 
     /**
      * Get end of the iterator to the elements in the stream.
      */
-    StreamIter end() { return stream.end(); }
+    StreamIter end() { return stream_.end(); }
 
     /**
      * Get const iterator to the elements in the stream.
      */
-    StreamConstIter begin() const { return stream.begin(); }
+    StreamConstIter begin() const { return stream_.begin(); }
 
     /**
      * Get end of the const iterator to the elements in the stream.
      */
-    StreamConstIter end() const { return stream.end(); }
+    StreamConstIter end() const { return stream_.end(); }
 
     /**
      * Get const iterator to the elements in the stream.
      */
-    StreamConstIter cbegin() const { return stream.cbegin(); }
+    StreamConstIter cbegin() const { return stream_.cbegin(); }
 
     /**
      * Get end of the const iterator to the elements in the stream.
      */
-    StreamConstIter cend() const { return stream.cend(); }
+    StreamConstIter cend() const { return stream_.cend(); }
 
     /* Modifiers */
 
@@ -125,19 +125,19 @@ public:
      * @param num    reserved number of elements.
      */
     void reset(size_t num = 16) {
-        if (num != stream.capacity()) {
+        if (num != stream_.capacity()) {
             // Non-binding request, as shrink_to_fit() is non-binding.
-            stream.resize(num);
-            stream.shrink_to_fit();
+            stream_.resize(num);
+            stream_.shrink_to_fit();
         }
-        stream.clear();
+        stream_.clear();
     }
 
     /**
      * Swap this stream with another stream \c s.
      */
     void swap(Stream<Data>& s) {
-        stream.swap(s.stream);
+        stream_.swap(s.stream_);
     }
 
     /**
@@ -146,25 +146,25 @@ public:
     void put(const Data& d) {
         // The growth of the STL vector is implementation dependent, but it
         // usually grows exponentially as a nearly-optimal solution.
-        stream.push_back(d);
+        stream_.push_back(d);
     }
 
     /**
      * Append a element to the stream.
      */
     void put(Data&& d) {
-        stream.push_back(std::forward<Data>(d));
+        stream_.push_back(std::forward<Data>(d));
     }
 
     /**
      * Sort the elements in the stream.
      */
     void sort() {
-        std::sort(stream.begin(), stream.end());
+        std::sort(stream_.begin(), stream_.end());
     }
 
 private:
-    std::vector<Data> stream;
+    std::vector<Data> stream_;
 };
 
 #endif  // UTILS_STREAM_H_

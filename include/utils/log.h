@@ -61,52 +61,52 @@ public:
      * @param file      log file. Use stdout/stderr if nullptr.
      */
     explicit Logger(const char* header = "", const char* file = nullptr)
-            : logHeader(header) {
+            : logHeader_(header) {
         if (file) {
-            fd = fopen(file, "a");
-            if (fd == NULL) {
+            fd_ = fopen(file, "a");
+            if (fd_ == NULL) {
                 perror("fopen() failed");
                 // We can panic in InitLog (will dump to stderr)
                 panic("Could not open log file %s", file);
             }
-            logFdOut = fd;
-            logFdErr = fd;
+            logFdOut_ = fd_;
+            logFdErr_ = fd_;
         } else {
-            fd = nullptr;
-            logFdOut = stdout;
-            logFdErr = stderr;
+            fd_ = nullptr;
+            logFdOut_ = stdout;
+            logFdErr_ = stderr;
         }
     }
 
     ~Logger() {
-        fclose(fd);
+        fclose(fd_);
     }
 
     template<typename... Args>
     void log_panic(const char* fmt, Args... args) {
-        __panic(logFdErr, logHeader.c_str(), fmt, args...);
+        __panic(logFdErr_, logHeader_.c_str(), fmt, args...);
     }
 
     template<typename... Args>
     void log_warn(const char* fmt, Args... args) {
-        logPrintLock.lock();
-        __warn(logFdErr, logHeader.c_str(), fmt, args...);
-        logPrintLock.unlock();
+        logPrintLock_.lock();
+        __warn(logFdErr_, logHeader_.c_str(), fmt, args...);
+        logPrintLock_.unlock();
     }
 
     template<typename... Args>
     void log_info(const char* fmt, Args... args) {
-        logPrintLock.lock();
-        __info(logFdErr, logHeader.c_str(), fmt, args...);
-        logPrintLock.unlock();
+        logPrintLock_.lock();
+        __info(logFdErr_, logHeader_.c_str(), fmt, args...);
+        logPrintLock_.unlock();
     }
 
 private:
-    FILE* fd;
-    FILE* logFdErr;
-    FILE* logFdOut;
-    const std::string logHeader;
-    std::mutex logPrintLock;
+    FILE* fd_;
+    FILE* logFdErr_;
+    FILE* logFdOut_;
+    const std::string logHeader_;
+    std::mutex logPrintLock_;
 };
 
 /* Assertion */

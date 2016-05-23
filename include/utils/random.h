@@ -18,7 +18,7 @@ public:
 
 public:
     explicit Random(uint64_t seed)
-            : prng(seed) {
+            : prng_(seed) {
         // Nothing else to do.
     }
 
@@ -28,7 +28,7 @@ public:
     }
 
     IntType getInteger() {
-        return intDist(prng);
+        return intDist_(prng_);
     }
 
     IntType getInteger(IntType min, IntType max) {
@@ -43,7 +43,7 @@ public:
     }
 
     RealType getReal() {
-        return realDist(prng);
+        return realDist_(prng_);
     }
 
     RealType getReal(RealType min, RealType max) {
@@ -54,10 +54,10 @@ public:
     }
 
 private:
-    std::mt19937_64 prng;
+    std::mt19937_64 prng_;
 
-    std::uniform_int_distribution<uint64_t> intDist;
-    std::uniform_real_distribution<double> realDist;
+    std::uniform_int_distribution<uint64_t> intDist_;
+    std::uniform_real_distribution<double> realDist_;
 };
 
 #endif  // UTILS_RANDOM_H_
