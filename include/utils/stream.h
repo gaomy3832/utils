@@ -77,14 +77,9 @@ public:
     size_t byte_size() const { return size() * sizeof(Data); }
 
     /**
-     * Get element with index \c idx.
+     * Get stream capacity in number of elements.
      */
-    Data& operator[](size_t idx) { return stream_[idx]; }
-
-    /**
-     * Get const element with index \c idx.
-     */
-    const Data& operator[](size_t idx) const { return stream_[idx]; }
+    size_t capacity() const { return stream_.capacity(); }
 
     /**
      * Get iterator to the elements in the stream.
