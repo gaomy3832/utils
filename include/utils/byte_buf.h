@@ -7,7 +7,7 @@
 /**
  * Generic buffer to store raw bytes.
  */
-#include <algorithm>    // for std::copy
+#include <algorithm>    // for std::copy, std::fill
 
 typedef uint8_t Byte;
 
@@ -114,10 +114,13 @@ public:
     }
 
     /**
-     * Resize buffer.
+     * Resize buffer. If size becomes larger, new space is all zero.
      */
     void resize(size_t sz) {
         reserve(sz);
+        if (sz > size_) {
+            std::fill(buffer_ + size_, buffer_ + sz, 0);
+        }
         size_ = sz;
     }
 
