@@ -4,6 +4,7 @@ PROGS = \
 	   exception_test \
 	   stream_test \
 	   string_utils_test \
+	   thread_test \
 
 
 BINDIR = bin
