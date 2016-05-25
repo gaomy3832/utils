@@ -22,6 +22,23 @@ TEST(ArithLogic, ilog2) {
     ASSERT_EQ(0, ilog2(0u));
 }
 
+TEST(ArithLogic, cilog2) {
+    ASSERT_EQ(0, cilog2(1u));
+    ASSERT_EQ(1, cilog2(2u));
+    ASSERT_EQ(2, cilog2(4u));
+    ASSERT_EQ(30, cilog2(1024u*1024*1024));
+    ASSERT_EQ(50, cilog2(1024uL*1024*1024*1024*1024));
+
+    ASSERT_EQ(3, cilog2(8u));
+    ASSERT_EQ(4, cilog2(10u));
+    ASSERT_EQ(4, cilog2(15u));
+    ASSERT_EQ(8, cilog2(255u));
+    ASSERT_EQ(32, cilog2(-1u));
+    ASSERT_EQ(64, cilog2(-1uL));
+
+    ASSERT_EQ(0, cilog2(0u));
+}
+
 TEST(ArithLogic, isPow2) {
     ASSERT_TRUE(isPow2(1));
     ASSERT_TRUE(isPow2(2));

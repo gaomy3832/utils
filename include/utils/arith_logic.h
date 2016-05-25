@@ -38,6 +38,16 @@ template<typename T> inline bool isPow2(T val) {
  */
 template<typename T> inline uint32_t ilog2(T val);
 
+/**
+ * Ceiling integer log2. Round up to the nearest integer.
+ *
+ * When \c val is 0, return 0.
+ */
+template<typename T> inline uint32_t cilog2(T val) {
+    auto m = ilog2(val);
+    return !val || isPow2(val) ? m : m + 1;
+}
+
 #ifdef __GNUC__
 // Only specializations of unsigned types (no calling these with ints)
 // __builtin_clz is undefined for 0 (internally, this uses bsr in x86-64)
