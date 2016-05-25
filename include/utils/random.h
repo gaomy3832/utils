@@ -27,14 +27,14 @@ public:
         // Nothing else to do.
     }
 
-    IntType getInteger() {
+    IntType get_integer() {
         return intDist_(prng_);
     }
 
-    IntType getInteger(IntType min, IntType max) {
+    IntType get_integer(IntType min, IntType max) {
         assert(max >= min);
         if (max == min) return min;
-        auto r = getInteger();
+        auto r = get_integer();
         auto span = max - min;
         if (span == std::numeric_limits<IntType>::max())
             return r;
@@ -42,13 +42,13 @@ public:
             return min + r % (span + 1);
     }
 
-    RealType getReal() {
+    RealType get_real() {
         return realDist_(prng_);
     }
 
-    RealType getReal(RealType min, RealType max) {
+    RealType get_real(RealType min, RealType max) {
         assert(max >= min);
-        auto r = getReal();
+        auto r = get_real();
         auto span = max - min;
         return min + r * span;
     }
