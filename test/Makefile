@@ -2,6 +2,7 @@ PROGS = \
 	   arith_logic_test \
 	   byte_buf_test \
 	   exception_test \
+	   random_test \
 	   stream_test \
 	   string_utils_test \
 	   thread_test \
