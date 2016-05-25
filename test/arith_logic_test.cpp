@@ -19,7 +19,7 @@ TEST(ArithLogic, ilog2) {
     ASSERT_EQ(31, ilog2(-1u));
     ASSERT_EQ(63, ilog2(-1uL));
 
-    ASSERT_EQ(0, 0);
+    ASSERT_EQ(0, ilog2(0u));
 }
 
 TEST(ArithLogic, isPow2) {
