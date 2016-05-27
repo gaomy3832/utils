@@ -4,11 +4,13 @@
  */
 #ifndef UTILS_BYTE_BUF_H_
 #define UTILS_BYTE_BUF_H_
-/**
- * Generic buffer to store raw bytes.
- */
+
 #include <algorithm>    // for std::copy, std::fill
 
+/**
+ * @brief
+ * Generic buffer to store raw bytes.
+ */
 class ByteBuf {
 public:
     /**
@@ -18,6 +20,7 @@ public:
 
 public:
     /**
+     * @brief
      * Initialize empty buffer.
      */
     ByteBuf()
@@ -26,7 +29,11 @@ public:
     }
 
     /**
+     * @brief
      * Initialize buffer with data.
+     *
+     * @param data  pointer to the initial data in the buffer.
+     * @param sz    byte size of the initial data.
      */
     template<typename T>
     ByteBuf(const T* data, size_t sz)
@@ -41,15 +48,16 @@ public:
         delete[] buffer_;  // nullptr is safe.
     }
 
-    /* Copy and move. */
+    /**
+     * @name
+     * Copy and move.
+     */
+    /**@{*/
 
     ByteBuf(const ByteBuf&) = delete;
 
     ByteBuf& operator=(const ByteBuf&) = delete;
 
-    /**
-     * Move constructor.
-     */
     ByteBuf(ByteBuf&& b)
             : buffer_(b.buffer_), size_(b.size_), capacity_(b.capacity_) {
         b.buffer_ = nullptr;
@@ -57,9 +65,6 @@ public:
         b.capacity_ = 0;
     }
 
-    /**
-     * Move assignment.
-     */
     ByteBuf& operator=(ByteBuf&& b) {
         // Avoid self assign.
         if (this == &b) return *this;
@@ -76,32 +81,50 @@ public:
         return *this;
     }
 
-    /* Member access */
+    /**@}*/
 
     /**
-     * Get raw pointer to the data.
+     * @name
+     * Member access.
+     */
+    /**@{*/
+
+    /**
+     * @return  raw pointer to the data.
      */
     Byte* data() { return buffer_; }
 
     /**
-     * Get const raw pointer to the data.
+     * @return  const raw pointer to the data.
      */
     const Byte* data() const { return buffer_; }
 
     /**
-     * Get buffer size in bytes.
+     * @return  buffer size in bytes.
      */
     size_t size() const { return size_; }
 
     /**
-     * Get buffer capacity in bytes.
+     * @return  buffer capacity in bytes.
      */
     size_t capacity() const { return capacity_; }
 
-    /* Modifiers */
+    /**@}*/
 
     /**
-     * Reserve at least \c cap bytes for the buffer. Keep original data.
+     * @name
+     * Modifiers.
+     */
+    /**@{*/
+
+    /**
+     * @brief
+     * Reserve at least \c cap bytes for the buffer.
+     *
+     * Keep original data. If requested \c cap is not larger than the current
+     * capacity, no changes will happen.
+     *
+     * @param cap  requested capacity of the buffer.
      */
     void reserve(size_t cap) {
         // Only grow buffer.
@@ -120,7 +143,12 @@ public:
     }
 
     /**
-     * Resize buffer. If size becomes larger, new space is all zero.
+     * @brief
+     * Resize buffer to \c sz bytes.
+     *
+     * If size becomes larger, new data are all initialized to zero.
+     *
+     * @param sz  requested size of the buffer in bytes.
      */
     void resize(size_t sz) {
         reserve(sz);
@@ -131,10 +159,11 @@ public:
     }
 
     /**
+     * @brief
      * Append more data to the buffer.
      *
-     * @param data  data pointer to be appended.
-     * @param sz    size of data to be appended.
+     * @param data  point to the data to be appended.
+     * @param sz    byte size of the data to be appended.
      */
     template<typename T>
     void append(const T* data, size_t sz) {
@@ -144,20 +173,16 @@ public:
         size_ += sz;
     }
 
+    /**@}*/
+
 private:
-    /**
-     * Buffer space.
-     */
+    // Buffer space.
     Byte* buffer_;
 
-    /**
-     * Used size of buffer.
-     */
+    // Used buffer size in bytes.
     size_t size_;
 
-    /**
-     * Allocated capacity of buffer.
-     */
+    // Allocated buffer capacity in bytes.
     size_t capacity_;
 };
 
