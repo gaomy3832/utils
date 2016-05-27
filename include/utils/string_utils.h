@@ -5,13 +5,22 @@
 #ifndef UTILS_STRING_UTILS_H_
 #define UTILS_STRING_UTILS_H_
 /**
+ * @file
+ *
+ * @brief
  * String utilities.
  */
+
 #include <string>
 #include <vector>
 
 /**
- * Tokenize.
+ * @brief
+ * Tokenize a string.
+ *
+ * @param str     string to be tokenized.
+ * @param tokens  output tokens.
+ * @param delimiters  a string in which all chars are treated as delimiters.
  */
 // http://oopweb.com/CPP/Documents/CPPHOWTO/Volume/C++Programming-HOWTO-7.html
 inline void tokenize(const std::string& str, std::vector<std::string>* tokens,
