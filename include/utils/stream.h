@@ -4,15 +4,15 @@
  */
 #ifndef UTILS_STREAM_H_
 #define UTILS_STREAM_H_
-/**
- * Generic FIFO stream.
- *
- * Implemented by std::vector.
- */
+
 #include <algorithm>    // for std::sort
 #include <utility>      // for std::swap
 #include <vector>
 
+/**
+ * @brief
+ * Generic stream of data.
+ */
 template<typename Data>
 class Stream {
 public:
@@ -21,9 +21,10 @@ public:
 
 public:
     /**
+     * @brief
      * Initialize stream.
      *
-     * @param num    initial number of elements.
+     * @param num    initial capacity in number of elements.
      */
     explicit Stream(size_t num = 16) {
         stream_.reserve(num);
@@ -31,22 +32,20 @@ public:
 
     ~Stream() {}
 
-    /* Copy and move */
+    /**
+     * @name
+     * Copy and move.
+     */
+    /**@{*/
 
     Stream(const Stream<Data>&) = delete;
 
     Stream<Data>& operator=(const Stream<Data>&) = delete;
 
-    /**
-     * Move constructor.
-     */
     Stream(Stream<Data>&& s) {
         stream_.swap(s.stream_);
     }
 
-    /**
-     * Move assignment.
-     */
     Stream<Data>& operator=(Stream<Data>&& s) {
         // Avoid self assign.
         if (this == &s) return *this;
@@ -54,70 +53,94 @@ public:
         return *this;
     }
 
-    /* Member access */
+    /**@}*/
 
     /**
-     * Get raw pointer to the data.
+     * @name
+     * Member access.
+     */
+    /**@{*/
+
+    /**
+     * @return  raw pointer to the data.
      */
     Data* data() { return stream_.data(); }
 
     /**
-     * Get const raw pointer to the data.
+     * @return  const raw pointer to the data.
      */
     const Data* data() const { return stream_.data(); }
 
     /**
-     * Get stream size in number of elements.
+     * @return  stream size in number of elements.
      */
     size_t size() const { return stream_.size(); }
 
     /**
-     * Get stream size in bytes.
+     * @return  stream size in bytes.
      */
     size_t byte_size() const { return size() * sizeof(Data); }
 
     /**
-     * Get stream capacity in number of elements.
+     * @return  stream capacity in number of elements.
      */
     size_t capacity() const { return stream_.capacity(); }
 
+    /**@}*/
+
     /**
-     * Get iterator to the elements in the stream.
+     * @name
+     * Iterator.
+     */
+    /**@{*/
+
+    /**
+     * @return  iterator to the elements in the stream.
      */
     Iter begin() { return stream_.begin(); }
 
     /**
-     * Get end of the iterator to the elements in the stream.
+     * @return  end of the iterator to the elements in the stream.
      */
     Iter end() { return stream_.end(); }
 
     /**
-     * Get const iterator to the elements in the stream.
+     * @return  const iterator to the elements in the stream.
      */
     ConstIter begin() const { return stream_.begin(); }
 
     /**
-     * Get end of the const iterator to the elements in the stream.
+     * @return  end of the const iterator to the elements in the stream.
      */
     ConstIter end() const { return stream_.end(); }
 
     /**
-     * Get const iterator to the elements in the stream.
+     * @return  const iterator to the elements in the stream.
      */
     ConstIter cbegin() const { return stream_.cbegin(); }
 
     /**
-     * Get end of the const iterator to the elements in the stream.
+     * @return  end of the const iterator to the elements in the stream.
      */
     ConstIter cend() const { return stream_.cend(); }
 
-    /* Modifiers */
+    /**@}*/
 
     /**
-     * Reset stream. Clear all elements and initialize to \c num elements.
+     * @name
+     * Modifiers.
+     */
+    /**@{*/
+
+    /**
+     * @brief
+     * Reset stream by clearing all elements.
+     *
+     * Initialize capacity to \c num elements.
+     *
      * Warning: non-binding.
      *
-     * @param num    reserved number of elements.
+     * @param num    reserved capacity in number of elements.
      */
     void reset(size_t num = 16) {
         if (num != stream_.capacity()) {
@@ -129,14 +152,20 @@ public:
     }
 
     /**
+     * @brief
      * Swap this stream with another stream \c s.
+     *
+     * @param s  the other stream to be swapped.
      */
     void swap(Stream<Data>& s) {
         stream_.swap(s.stream_);
     }
 
     /**
-     * Append a element to the stream.
+     * @brief
+     * Append an element \c d to the stream.
+     *
+     * @param d  the element to be appended.
      */
     void put(const Data& d) {
         // The growth of the STL vector is implementation dependent, but it
@@ -145,20 +174,27 @@ public:
     }
 
     /**
-     * Append a element to the stream.
+     * @brief
+     * Append an element \c d to the stream.
+     *
+     * @param d  the element to be appended.
      */
     void put(Data&& d) {
         stream_.push_back(std::forward<Data>(d));
     }
 
     /**
+     * @brief
      * Sort the elements in the stream.
      */
     void sort() {
         std::sort(stream_.begin(), stream_.end());
     }
 
+    /**@}*/
+
 private:
+    // Implemented using std::vector.
     std::vector<Data> stream_;
 };
 
