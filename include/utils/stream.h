@@ -16,8 +16,8 @@
 template<typename Data>
 class Stream {
 public:
-    typedef typename std::vector<Data>::iterator StreamIter;
-    typedef typename std::vector<Data>::const_iterator StreamConstIter;
+    typedef typename std::vector<Data>::iterator Iter;
+    typedef typename std::vector<Data>::const_iterator ConstIter;
 
 public:
     /**
@@ -84,32 +84,32 @@ public:
     /**
      * Get iterator to the elements in the stream.
      */
-    StreamIter begin() { return stream_.begin(); }
+    Iter begin() { return stream_.begin(); }
 
     /**
      * Get end of the iterator to the elements in the stream.
      */
-    StreamIter end() { return stream_.end(); }
+    Iter end() { return stream_.end(); }
 
     /**
      * Get const iterator to the elements in the stream.
      */
-    StreamConstIter begin() const { return stream_.begin(); }
+    ConstIter begin() const { return stream_.begin(); }
 
     /**
      * Get end of the const iterator to the elements in the stream.
      */
-    StreamConstIter end() const { return stream_.end(); }
+    ConstIter end() const { return stream_.end(); }
 
     /**
      * Get const iterator to the elements in the stream.
      */
-    StreamConstIter cbegin() const { return stream_.cbegin(); }
+    ConstIter cbegin() const { return stream_.cbegin(); }
 
     /**
      * Get end of the const iterator to the elements in the stream.
      */
-    StreamConstIter cend() const { return stream_.cend(); }
+    ConstIter cend() const { return stream_.cend(); }
 
     /* Modifiers */
 
