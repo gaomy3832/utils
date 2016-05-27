@@ -5,6 +5,9 @@
 #ifndef UTILS_EXCEPTION_H_
 #define UTILS_EXCEPTION_H_
 /**
+ * @file
+ *
+ * @brief
  * Generic types of exception.
  *
  * Two generic types: range exception and resource exception.
@@ -13,10 +16,12 @@
  *
  * All exception types are derived from std::exception.
  */
+
 #include <exception>
 #include <string>
 
 /**
+ * @brief
  * Resource exception.
  */
 class Exception : public std::exception {
@@ -30,6 +35,7 @@ protected:
 };
 
 /**
+ * @brief
  * Range exception.
  */
 class RangeException : public Exception {
@@ -38,8 +44,12 @@ public:
 };
 
 /**
+ * @defgroup resource_exception
+ *
+ * @brief
  * Derived types of resource exception.
  */
+/**@{*/
 
 class KeyInUseException : public Exception {
 public:
@@ -87,4 +97,7 @@ public:
     explicit InternalException(const std::string& str) : Exception(str) {}
 };
 
+/**@}*/
+
 #endif  // UTILS_EXCEPTION_H_
+
