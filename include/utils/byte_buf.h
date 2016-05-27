@@ -9,9 +9,13 @@
  */
 #include <algorithm>    // for std::copy, std::fill
 
-typedef uint8_t Byte;
-
 class ByteBuf {
+public:
+    /**
+     * Byte type.
+     */
+    typedef uint8_t Byte;
+
 public:
     /**
      * Initialize empty buffer.

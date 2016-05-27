@@ -45,7 +45,7 @@ TEST_F(ByteBufTest, initializeConstructor) {
     ByteBuf buf3(data.data(), data.size() * sizeof(uint32_t));
     ASSERT_EQ(data.size() * sizeof(uint32_t), buf3.size());
     const auto* d = buf3.data();
-    for (Byte idx = 0; idx < buf3.size(); idx++) {
+    for (ByteBuf::Byte idx = 0; idx < buf3.size(); idx++) {
         ASSERT_EQ(idx, d[idx]);
     }
 }
@@ -54,7 +54,7 @@ TEST_F(ByteBufTest, moveConstructor) {
     const auto size = buf2->size();
     const auto capacity = buf2->capacity();
 
-    Byte check[100];
+    ByteBuf::Byte check[100];
     std::copy(buf2->data(), buf2->data() + size, check);
 
     ByteBuf buf3(std::move(*buf2));
@@ -72,7 +72,7 @@ TEST_F(ByteBufTest, moveAssignment) {
     const auto size = buf2->size();
     const auto capacity = buf2->capacity();
 
-    Byte check[100];
+    ByteBuf::Byte check[100];
     std::copy(buf2->data(), buf2->data() + size, check);
 
     ByteBuf buf3 = ByteBuf(msg, 2);
@@ -93,7 +93,7 @@ TEST_F(ByteBufTest, reserve) {
     ASSERT_EQ(16, buf1->capacity());
     ASSERT_EQ(0, buf1->size());
 
-    Byte check[100];
+    ByteBuf::Byte check[100];
     std::copy(buf2->data(), buf2->data() + buf2->size(), check);
     const auto size = buf2->size();
 
@@ -113,7 +113,7 @@ TEST_F(ByteBufTest, append) {
     const auto size = buf2->size();
     const auto capacity = buf2->capacity();
 
-    Byte check[100];
+    ByteBuf::Byte check[100];
     std::copy(buf2->data(), buf2->data() + size, check);
 
     // Append 0-length: size and capacity do not change.
@@ -143,7 +143,7 @@ TEST_F(ByteBufTest, resizeSmaller) {
     const auto size = buf2->size();
     const auto capacity = buf2->capacity();
 
-    Byte check[100];
+    ByteBuf::Byte check[100];
     std::copy(buf2->data(), buf2->data() + size, check);
 
     // Resizing to smaller size doesn't affect capacity.
@@ -166,9 +166,9 @@ TEST_F(ByteBufTest, resizeLarger) {
     const auto size = buf2->size();
     const auto capacity = buf2->capacity();
 
-    Byte check[100];
+    ByteBuf::Byte check[100];
     std::copy(buf2->data(), buf2->data() + size, check);
-    Byte zero[100];
+    ByteBuf::Byte zero[100];
     std::fill(zero, zero + 100, 0);
 
     // Resizing to larger size may require larger capacity.
