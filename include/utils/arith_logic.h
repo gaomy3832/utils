@@ -14,7 +14,8 @@
 #include <cstdint>
 
 /**
- * @name Bithack operations.
+ * @name
+ * Bithack operations.
  *
  * See the bithacks website
  * http://graphics.stanford.edu/~seander/bithacks.html
@@ -22,6 +23,7 @@
 /**@{*/
 
 /**
+ * @brief
  * Test power of 2.
  *
  * @param val  Value to be tested.
@@ -32,14 +34,20 @@ template<typename T> inline bool isPow2(T val) {
 }
 
 /**
- * Integer log2. Round down to the nearest integer.
+ * @brief
+ * Integer log2.
+ *
+ * Round down to the nearest integer.
  *
  * When \c val is 0, return 0.
  */
 template<typename T> inline uint32_t ilog2(T val);
 
 /**
- * Ceiling integer log2. Round up to the nearest integer.
+ * @brief
+ * Ceiling integer log2.
+ *
+ * Round up to the nearest integer.
  *
  * When \c val is 0, return 0.
  */
