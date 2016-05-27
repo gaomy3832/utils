@@ -24,10 +24,12 @@ public:
     /**
      * Initialize buffer with data.
      */
-    ByteBuf(const Byte* data, size_t sz)
+    template<typename T>
+    ByteBuf(const T* data, size_t sz)
             : ByteBuf() {
         reserve(sz);
-        std::copy(data, data + sz, buffer_);
+        const Byte* d = reinterpret_cast<const Byte*>(data);
+        std::copy(d, d + sz, buffer_);
         size_ = sz;
     }
 
@@ -130,9 +132,11 @@ public:
      * @param data  data pointer to be appended.
      * @param sz    size of data to be appended.
      */
-    void append(const Byte* data, size_t sz) {
+    template<typename T>
+    void append(const T* data, size_t sz) {
         reserve(size_ + sz);
-        std::copy(data, data + sz, buffer_ + size_);
+        const Byte* d = reinterpret_cast<const Byte*>(data);
+        std::copy(d, d + sz, buffer_ + size_);
         size_ += sz;
     }
 

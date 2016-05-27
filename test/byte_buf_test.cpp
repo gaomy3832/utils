@@ -18,8 +18,7 @@ protected:
         delete buf2;
     }
 
-    const Byte* msg = reinterpret_cast<const Byte*>(
-            "a very very long test message");
+    const char* msg = "a very very long test message";
 
     ByteBuf* buf1;
     ByteBuf* buf2;
@@ -36,6 +35,19 @@ TEST_F(ByteBufTest, initializeConstructor) {
     ASSERT_EQ(6, buf2->size());
     // Initialization will round up capacity to power of 2.
     ASSERT_EQ(8, buf2->capacity());
+
+    std::vector<uint32_t> data(4, 0);
+    data[0] = (3u << 24) + (2u << 16) + (1u << 8) + 0u;
+    data[1] = (7u << 24) + (6u << 16) + (5u << 8) + 4u;
+    data[2] = (11u << 24) + (10u << 16) + (9u << 8) + 8u;
+    data[3] = (15u << 24) + (14u << 16) + (13u << 8) + 12u;
+
+    ByteBuf buf3(data.data(), data.size() * sizeof(uint32_t));
+    ASSERT_EQ(data.size() * sizeof(uint32_t), buf3.size());
+    const auto* d = buf3.data();
+    for (Byte idx = 0; idx < buf3.size(); idx++) {
+        ASSERT_EQ(idx, d[idx]);
+    }
 }
 
 TEST_F(ByteBufTest, moveConstructor) {
