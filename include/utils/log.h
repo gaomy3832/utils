@@ -5,8 +5,12 @@
 #ifndef UTILS_LOG_H_
 #define UTILS_LOG_H_
 /**
- * Generic logging/info/warn/panic routines.
+ * @file
+ *
+ * @brief
+ * Generic logging.
  */
+
 #include <cstdio>
 #include <cstdlib>
 #include <mutex>
@@ -14,7 +18,7 @@
 
 #define PANIC_EXIT_CODE (112)
 
-/* Logging */
+/** @cond INTERNAL */
 
 // Generic logging, thread-unsafe
 #define __panic(logFdErr, logHeader, ...) \
@@ -42,12 +46,22 @@
     fflush(logFdOut); \
 }
 
-// Basic logging, thread-unsafe, print to stdout/stderr, no header
+/** @endcond */
+
+/**
+ * @name
+ * Basic logging.
+ *
+ * Thread-unsafe, print to stdout/stderr, no header.
+ */
+/**@{*/
 #define panic(...) __panic(stderr, "", __VA_ARGS__)
 #define warn(...)  __warn(stderr, "", __VA_ARGS__)
 #define info(...)  __info(stdout, "", __VA_ARGS__)
+/**@}*/
 
 /**
+ * @brief
  * Logging class.
  *
  * Thread-safe, support redirection to files, support header.
@@ -82,6 +96,12 @@ public:
         fclose(fd_);
     }
 
+    /**
+     * @name
+     * Logging.
+     */
+    /**@{*/
+
     template<typename... Args>
     void log_panic(const char* fmt, Args... args) {
         __panic(logFdErr_, logHeader_.c_str(), fmt, args...);
@@ -101,6 +121,8 @@ public:
         logPrintLock_.unlock();
     }
 
+    /**@}*/
+
 private:
     FILE* fd_;
     FILE* logFdErr_;
@@ -109,7 +131,11 @@ private:
     std::mutex logPrintLock_;
 };
 
-/* Assertion */
+/**
+ * @name
+ * Assertion.
+ */
+/**@{*/
 
 #ifndef NASSERT
 
@@ -145,6 +171,7 @@ if (!(cond)) { \
 
 #endif  // NASSERT
 
+/**@}*/
 
 #endif  // UTILS_LOG_H_
 
