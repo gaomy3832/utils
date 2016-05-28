@@ -5,11 +5,15 @@
 #ifndef UTILS_THREAD_H_
 #define UTILS_THREAD_H_
 /**
- * Wrappers for thread support routines,
- * including thread manipulation and synchronization primitives.
+ * @file
  *
- * Use c++11 primitives and routines.
+ * @brief
+ * Wrappers for thread support routines.
+ *
+ * Include thread manipulation and synchronization primitives. Use c++11
+ * primitives and routines.
  */
+
 #include <condition_variable>
 #include <mutex>
 #include <queue>
@@ -18,73 +22,106 @@
 #include "utils/exception.h"
 #include "utils/log.h"
 
-class _Barrier;
-class _ThreadPool;
-
-using thread_t = std::thread;
-using lock_t = std::mutex;
-using cond_t = std::condition_variable;
-using bar_t = _Barrier;
-
-using task_t = std::function<void()>;
-using thread_pool_t = _ThreadPool;
-
 /**
+ * @brief
  * Threads.
+ *
+ * Use constructor to create a thread and execute the function:
+ * @code
+ * template<class Function, class... Args>
+ * explicit thread(Function&& f, Args&&... args);
+ * @endcode
+ *
+ * To join, use
+ * @code
+ * void join()
+ * @endcode
  */
-// Use constructor to create a thread and execute the function:
-// template<class Function, class... Args>
-// explicit thread(Function&& f, Args&&... args);
-
-// Use member function join() to join.
+using thread_t = std::thread;
 
 /**
+ * @brief
  * Mutexes.
+ *
+ * Use member functions:
+ * @code
+ * void lock()
+ * @endcode
+ * @code
+ * bool try_lock()
+ * @endcode
+ * @code
+ * void unlock()
+ * @endcode
  */
-// Use member functions lock(), try_lock(), and unlock().
+using lock_t = std::mutex;
 
-// General-purpose mutex ownership wrapper.
+/**
+ * @defgroup mutex_region
+ *
+ * General-purpose mutex ownership wrapper.
+ */
+/**@{*/
 #define mutex_begin(uniq_lk, lk) \
     { std::unique_lock<lock_t> uniq_lk(lk);
 #define mutex_end() \
     }
+/**@}*/
 
 /**
+ * @brief
  * Condition variables.
+ *
+ * Use member functions to wait:
+ * @code
+ * void wait(std::unique_lock<std::mutex>& lock);
+ * @endcode
+ * @code
+ * template<class Predicate>
+ * void wait(std::unique_lock<std::mutex>& lock, Predicate pred);
+ * @endcode
+ *
+ * Use member functions to notify:
+ * @code
+ * void notify_one();
+ * @endcode
+ * @code
+ * void notify_all();
+ * @endcode
  */
-// Use member functions to wait:
-// void wait(std::unique_lock<std::mutex>& lock);
-// template<class Predicate>
-// void wait(std::unique_lock<std::mutex>& lock, Predicate pred);
-
-// Use member functions to notify:
-// void notify_one();
-// void notify_all();
+using cond_t = std::condition_variable;
 
 /**
+ * @brief
  * Barrier.
  */
-class _Barrier {
+class bar_t {
 public:
+    /**
+     * Return value from the thread with the barrier serial point.
+     */
     static constexpr int SERIAL_LAST_THREAD = 1;
 
+public:
     /**
-     * Construct the barrier.
+     * @brief
+     * Initialize the barrier.
      *
-     * @param threadCount   The number of threads involved in the barrier.
+     * @param count  the number of threads involved in the barrier.
      */
-    explicit _Barrier(const std::size_t threadCount)
-            : threadCount_(threadCount), remain_(threadCount), barCount_(0) {
+    explicit bar_t(const size_t count)
+            : threadCount_(count), remain_(count), barCount_(0) {
         // Nothing else to do.
     }
 
     /**
+     * @brief
      * Wait on the barrier.
      *
-     * @param onSerialPoint   A callback to be called at the barrier serial
-     * point.
-     * @return  SERIAL_LAST_THREAD if the thread is the last one arriving
-     * at the barrier, or 0 otherwise.
+     * @param onSerialPoint  callback function at the barrier serial point.
+     * Default to be empty function.
+     * @return  \c SERIAL_LAST_THREAD if the thread is the last one arriving at
+     * the barrier, or 0 otherwise.
      */
     int wait(const std::function<void(void)>& onSerialPoint = [](){}) {
         mutex_begin(lock_, mutex_);
@@ -121,89 +158,105 @@ private:
 };
 
 /**
- * Task queue for thread pool.
- */
-class _TaskQueue {
-public:
-    _TaskQueue() : stop_(false) {}
-
-    ~_TaskQueue() {}
-
-    _TaskQueue(_TaskQueue&&) = default;
-
-    _TaskQueue& operator=(_TaskQueue&&) = default;
-
-    _TaskQueue(const _TaskQueue&) = delete;
-
-    _TaskQueue& operator=(const _TaskQueue&) = delete;
-
-    /**
-     * Enqueue a task.
-     */
-    void enqueue(const task_t& task) {
-        mutex_begin(uqlk, lock_);
-        if (stop_) {
-            throw PermissionException(
-                    "TaskQueue: enqueue on stopped task queue!");
-        }
-        if (!task) {
-            throw InvalidArgumentException(
-                    "TaskQueue: enqueue empty task!");
-        }
-        queue_.push(task);
-        mutex_end();
-        enqueue_.notify_one();
-    }
-
-    /**
-     * Dequeue a task. Blocked.
-     */
-    task_t dequeue() {
-        mutex_begin(uqlk, lock_);
-        enqueue_.wait(uqlk, [this]{ return !queue_.empty() || stop_; });
-        if (stop_ && queue_.empty()) {
-            // empty task
-            return std::function<void()>();
-        }
-        auto task = queue_.front();
-        queue_.pop();
-        return task;
-        mutex_end();
-    }
-
-    /**
-     * Tear down the task queue.
-     */
-    void close() {
-        mutex_begin(uqlk, lock_);
-        stop_ = true;
-        mutex_end();
-        enqueue_.notify_all();
-    }
-
-private:
-    std::queue<task_t> queue_;
-    lock_t lock_;
-    cond_t enqueue_;
-    bool stop_;
-};
-
-/**
+ * @brief
  * Thread pool.
  */
-class _ThreadPool {
+class thread_pool_t {
+private:
+    /**
+     * @brief
+     * Task queue for thread pool.
+     */
+    class TaskQueue {
+    public:
+        using Task = std::function<void()>;
+
+    public:
+        TaskQueue() : stop_(false) {}
+
+        ~TaskQueue() {}
+
+        TaskQueue(TaskQueue&&) = default;
+
+        TaskQueue& operator=(TaskQueue&&) = default;
+
+        TaskQueue(const TaskQueue&) = delete;
+
+        TaskQueue& operator=(const TaskQueue&) = delete;
+
+        /**
+         * @brief
+         * Enqueue a task.
+         */
+        void enqueue(const Task& task) {
+            mutex_begin(uqlk, lock_);
+            if (stop_) {
+                throw PermissionException(
+                        "TaskQueue: enqueue on stopped task queue!");
+            }
+            if (!task) {
+                throw InvalidArgumentException(
+                        "TaskQueue: enqueue empty task!");
+            }
+            queue_.push(task);
+            mutex_end();
+            enqueue_.notify_one();
+        }
+
+        /**
+         * @brief
+         * Dequeue a task. Blocked.
+         */
+        Task dequeue() {
+            mutex_begin(uqlk, lock_);
+            enqueue_.wait(uqlk, [this]{ return !queue_.empty() || stop_; });
+            if (stop_ && queue_.empty()) {
+                // empty task
+                return std::function<void()>();
+            }
+            auto task = queue_.front();
+            queue_.pop();
+            return task;
+            mutex_end();
+        }
+
+        /**
+         * @brief
+         * Tear down the task queue.
+         */
+        void close() {
+            mutex_begin(uqlk, lock_);
+            stop_ = true;
+            mutex_end();
+            enqueue_.notify_all();
+        }
+
+    private:
+        std::queue<Task> queue_;
+        lock_t lock_;
+        cond_t enqueue_;
+        bool stop_;
+    };
+
 public:
     static const uint32_t INV_TID = -1u;
 
-    explicit _ThreadPool(uint32_t threadCount)
-            : threadCount_(threadCount), queues_(threadCount),
+public:
+    /**
+     * @brief
+     * Initialize the thread pool.
+     *
+     * @param count  the number of threads.
+     */
+    explicit thread_pool_t(uint32_t count)
+            : threadCount_(count), queues_(count),
               taskCount_(0), curThreadIdx_(0) {
         for (uint32_t tid = 0; tid < threadCount_; tid++) {
-            threads_.emplace_back(&_ThreadPool::thread_func, this, tid);
+            threads_.emplace_back(&thread_pool_t::thread_func, this, tid);
         }
     }
 
-    ~_ThreadPool() {
+    ~thread_pool_t() {
         for (auto& q : queues_) {
             q.close();
         }
@@ -212,15 +265,31 @@ public:
         }
     }
 
-    _ThreadPool(_ThreadPool&&) = default;
+    /**
+     * @name
+     * Copy and move.
+     */
+    /**@{*/
 
-    _ThreadPool& operator=(_ThreadPool&&) = default;
+    thread_pool_t(thread_pool_t&&) = default;
 
-    _ThreadPool(const _ThreadPool&) = delete;
+    thread_pool_t& operator=(thread_pool_t&&) = default;
 
-    _ThreadPool& operator=(const _ThreadPool&) = delete;
+    thread_pool_t(const thread_pool_t&) = delete;
 
-    void add_task(const task_t& task, uint32_t tid = INV_TID) {
+    thread_pool_t& operator=(const thread_pool_t&) = delete;
+
+    /**@}*/
+
+    /**
+     * @brief
+     * Add task to the thread pool to be executed.
+     *
+     * @param task  task function.
+     * @param tid   optional thread ID to which the task should be assigned to.
+     * If \c INV_TID, then assign to the next thread.
+     */
+    void add_task(const std::function<void()>& task, uint32_t tid = INV_TID) {
         if (tid == INV_TID) {
             tid = next_tid();
         }
@@ -232,6 +301,10 @@ public:
         queues_[tid].enqueue(task);
     }
 
+    /**
+     * @brief
+     * Wait until all tasks finish.
+     */
     void wait_all() {
         mutex_begin(uqlk, taskLock_);
         taskDone_.wait(uqlk, [this]{ return taskCount_ == 0; });
@@ -241,7 +314,7 @@ public:
 private:
     const uint32_t threadCount_;
     std::vector<thread_t> threads_;
-    std::vector<_TaskQueue> queues_;
+    std::vector<TaskQueue> queues_;
 
     // Track number of pending tasks
     lock_t taskLock_;
