@@ -4,3 +4,5 @@
 *.d
 test/bin
 test/googletest*/
+doc/html/
+doc/latex/
