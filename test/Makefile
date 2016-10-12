@@ -10,7 +10,6 @@ PROGS = \
 
 BINDIR = bin
 
-# default gtest path is under the top directory.
 GTEST ?= googletest
 GTESTVER = 1.7.0
 
@@ -32,11 +31,8 @@ LDFLAGS += $(GTEST)/make/gtest_main.a -lpthread
 %.o: %.cpp | $(GTEST)
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -MP -MMD
 
-define link_rule
-$(BINDIR)/$1: $1.o | $(BINDIR) $(GTEST)
-	$$(CXX) $$< -o $$@ $$(CXXFLAGS) $$(LDFLAGS)
-endef
-$(foreach P,$(PROGS),$(eval $(call link_rule,$(P))))
+$(BINDIR)/%: %.o | $(BINDIR) $(GTEST)
+	$(CXX) $< -o $@ $(CXXFLAGS) $(LDFLAGS)
 
 
 $(BINDIR):
