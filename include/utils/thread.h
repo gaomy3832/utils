@@ -4,15 +4,6 @@
  */
 #ifndef UTILS_THREAD_H_
 #define UTILS_THREAD_H_
-/**
- * @file
- *
- * @brief
- * Wrappers for thread support routines.
- *
- * Include thread manipulation and synchronization primitives. Use c++11
- * primitives and routines.
- */
 
 #include <condition_variable>
 #include <mutex>
@@ -21,6 +12,16 @@
 #include <vector>
 #include "utils/exception.h"
 #include "utils/log.h"
+
+/**
+ * @addtogroup parallel Parallel processing
+ *
+ * Include thread manipulation and synchronization primitives.
+ *
+ * Use C++11 primitives and routines.
+ *
+ * @{
+ */
 
 /**
  * @brief
@@ -57,9 +58,8 @@ using thread_t = std::thread;
 using lock_t = std::mutex;
 
 /**
- * @defgroup mutex_region
- *
- * General-purpose mutex ownership wrapper.
+ * @name
+ * Mutex ownership region.
  */
 /**@{*/
 #define mutex_begin(uniq_lk, lk) \
@@ -344,6 +344,8 @@ private:
         }
     }
 };
+
+/**@}*/
 
 #endif  // UTILS_THREAD_H_
 

@@ -4,23 +4,17 @@
  */
 #ifndef UTILS_ARITH_LOGIC_H_
 #define UTILS_ARITH_LOGIC_H_
-/**
- * @file
- *
- * @brief
- * Basic arithmetic and logic operations.
- */
 
 #include <cstdint>
 
 /**
- * @name
- * Bithack operations.
+ * @addtogroup bit_hack Bithack operations
  *
  * See the bithacks website
  * http://graphics.stanford.edu/~seander/bithacks.html
+ *
+ * @{
  */
-/**@{*/
 
 /**
  * @brief

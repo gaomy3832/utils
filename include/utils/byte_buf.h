@@ -8,6 +8,12 @@
 #include <algorithm>    // for std::copy, std::fill
 
 /**
+ * @addtogroup containers
+ *
+ * @{
+ */
+
+/**
  * @brief
  * Generic buffer to store raw bytes.
  */
@@ -185,6 +191,8 @@ private:
     // Allocated buffer capacity in bytes.
     size_t capacity_;
 };
+
+/**@}*/
 
 #endif  // UTILS_BYTE_BUF_H_
 

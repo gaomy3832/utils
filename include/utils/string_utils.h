@@ -4,15 +4,15 @@
  */
 #ifndef UTILS_STRING_UTILS_H_
 #define UTILS_STRING_UTILS_H_
-/**
- * @file
- *
- * @brief
- * String utilities.
- */
 
 #include <string>
 #include <vector>
+
+/**
+ * @addtogroup string String utilities
+ *
+ * @{
+ */
 
 /**
  * @brief
@@ -40,6 +40,8 @@ inline void tokenize(const std::string& str, std::vector<std::string>* tokens,
         pos = str.find_first_of(delimiters, lastPos);
     }
 }
+
+/**@}*/
 
 #endif  // UTILS_STRING_UTILS_H_
 

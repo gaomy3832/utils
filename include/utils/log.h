@@ -4,12 +4,6 @@
  */
 #ifndef UTILS_LOG_H_
 #define UTILS_LOG_H_
-/**
- * @file
- *
- * @brief
- * Generic logging.
- */
 
 #include <cstdio>
 #include <cstdlib>
@@ -47,6 +41,12 @@
 }
 
 /** @endcond */
+
+/**
+ * @addtogroup log Logging
+ *
+ * @{
+ */
 
 /**
  * @name
@@ -170,6 +170,8 @@ if (!(cond)) { \
 #define assert_msg(cond, ...) do { (void)sizeof(cond); } while (0);
 
 #endif  // NASSERT
+
+/**@}*/
 
 /**@}*/
 

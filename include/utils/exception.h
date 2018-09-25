@@ -4,26 +4,28 @@
  */
 #ifndef UTILS_EXCEPTION_H_
 #define UTILS_EXCEPTION_H_
+
+#include <exception>
+#include <string>
+
 /**
- * @file
- *
- * @brief
- * Generic types of exception.
+ * @addtogroup exception Exceptions
  *
  * Two generic types: range exception and resource exception.
  *
  * Resource exception has multiple derived types.
  *
  * All exception types are derived from std::exception.
+ *
+ * @{
  */
-
-#include <exception>
-#include <string>
 
 /**
- * @brief
- * Resource exception.
+ * @addtogroup resource_exception Resource exception
+ *
+ * @{
  */
+
 class Exception : public std::exception {
 public:
     const char* what() const throw() { return str_.c_str(); }
@@ -34,22 +36,26 @@ protected:
     explicit Exception(const std::string& str) : str_(str) {}
 };
 
+/**@}*/
+
 /**
- * @brief
- * Range exception.
+ * @addtogroup range_exception Range exception
+ *
+ * @{
  */
+
 class RangeException : public Exception {
 public:
     explicit RangeException(const std::string& str) : Exception(str) {}
 };
 
+/**@}*/
+
 /**
- * @defgroup resource_exception
+ * @addtogroup resource_exception
  *
- * @brief
- * Derived types of resource exception.
+ * @{
  */
-/**@{*/
 
 class KeyInUseException : public Exception {
 public:
@@ -96,6 +102,8 @@ class InternalException : public Exception {
 public:
     explicit InternalException(const std::string& str) : Exception(str) {}
 };
+
+/**@}*/
 
 /**@}*/
 

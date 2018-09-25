@@ -10,6 +10,12 @@
 #include <vector>
 
 /**
+ * @addtogroup containers
+ *
+ * @{
+ */
+
+/**
  * @brief
  * Generic stream of data.
  */
@@ -197,6 +203,8 @@ private:
     // Implemented using std::vector.
     std::vector<Data> stream_;
 };
+
+/**@}*/
 
 #endif  // UTILS_STREAM_H_
 
