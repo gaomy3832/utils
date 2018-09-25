@@ -3,13 +3,13 @@
  *
  */
 #include "gtest/gtest.h"
-#include "utils/thread.h"
+#include "utils/parallel.h"
 #include <algorithm>        // for std::fill
 
 constexpr uint32_t thCnt = 8;
 constexpr uint32_t itCnt = 4;
 
-TEST(Thread, thread) {
+TEST(Parallel, thread) {
     std::vector<thread_t> threads;
     const uint32_t val = 123;
 
@@ -33,7 +33,7 @@ TEST(Thread, thread) {
     }
 }
 
-TEST(Thread, threadPool) {
+TEST(Parallel, threadPool) {
     const uint32_t val = 123;
 
     std::array<uint32_t, thCnt> spawned;
@@ -55,7 +55,7 @@ TEST(Thread, threadPool) {
     }
 }
 
-TEST(Thread, mutex) {
+TEST(Parallel, mutex) {
     uint32_t var = 0;
     lock_t mutex;
 
@@ -76,7 +76,7 @@ TEST(Thread, mutex) {
     ASSERT_EQ((0+7)*8/2 * itCnt, var);
 }
 
-TEST(Thread, mutexRegion) {
+TEST(Parallel, mutexRegion) {
     uint32_t var = 0;
     lock_t mutex;
 
@@ -97,7 +97,7 @@ TEST(Thread, mutexRegion) {
     ASSERT_EQ((0+7)*8/2 * itCnt, var);
 }
 
-TEST(Thread, barrier) {
+TEST(Parallel, barrier) {
     uint32_t var = 0;
     bar_t bar(thCnt);
 

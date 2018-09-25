@@ -2,8 +2,8 @@
  * Copyright 2016 Mingyu Gao
  *
  */
-#ifndef UTILS_THREAD_H_
-#define UTILS_THREAD_H_
+#ifndef UTILS_PARALLEL_H_
+#define UTILS_PARALLEL_H_
 
 #include <condition_variable>
 #include <mutex>
@@ -347,5 +347,5 @@ private:
 
 /**@}*/
 
-#endif  // UTILS_THREAD_H_
+#endif  // UTILS_PARALLEL_H_
 

@@ -5,7 +5,7 @@ PROGS = \
 	   random_test \
 	   stream_test \
 	   string_utils_test \
-	   thread_test \
+	   parallel_test \
 
 
 BINDIR = bin
