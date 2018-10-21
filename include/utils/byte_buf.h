@@ -24,6 +24,8 @@ public:
      */
     typedef uint8_t Byte;
 
+    static_assert(sizeof(Byte) == 1, "ByteBuf Byte type must have size of one byte");
+
 public:
     /**
      * @brief
