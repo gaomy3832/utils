@@ -1,6 +1,7 @@
 PROGS = \
 	   arith_logic_test \
 	   byte_buf_test \
+	   chunk_list_test \
 	   exception_test \
 	   random_test \
 	   stream_test \
@@ -53,7 +54,7 @@ clean_gtest:
 	rm -rf $(GTEST)
 
 
-.PHONY: clean
+.PHONY: test clean clean_gtest
 
 -include $(DEPS)
 
