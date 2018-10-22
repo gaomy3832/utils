@@ -8,7 +8,7 @@
 #include <array>
 #include <list>
 #include <stdexcept>
-#include <type_traits>  // for std::is_standard_layout
+#include <type_traits>  // for std::is_standard_layout, std::enable_if, std::conditional, std::is_same
 #include <utility>  // for std::swap
 
 /**
@@ -422,10 +422,203 @@ private:
 private:
     ChunkListStorageType list_;
     size_type size_;
+
+private:
+    struct ConstIterTagType {};
+    struct IterTagType {};
+
+    template<typename TagType>
+    class BaseIterator {
+    public:
+        using value_type = ChunkList::value_type;
+        using difference_type = ChunkList::difference_type;
+        using pointer = ChunkList::pointer;
+        using reference = ChunkList::reference;
+        using iterator_category = std::bidirectional_iterator_tag;
+
+    public:
+        using LSType = typename std::conditional<std::is_same<TagType, ConstIterTagType>::value,
+              const ChunkListStorageType, ChunkListStorageType>::type;
+
+        using LSIterType = typename std::conditional<std::is_same<TagType, ConstIterTagType>::value,
+              typename ChunkListStorageType::const_iterator,
+              typename ChunkListStorageType::iterator>::type;
+
+        using CSIterType = typename std::conditional<std::is_same<TagType, ConstIterTagType>::value,
+              typename Chunk::ChunkStorageType::const_iterator,
+              typename Chunk::ChunkStorageType::iterator>::type;
+
+    public:
+        BaseIterator(LSType* list, const LSIterType& listIter, const CSIterType& chIter)
+            : list_(list), listIter_(listIter), chIter_(chIter)
+        {
+            // Nothing else to do.
+        }
+
+        BaseIterator(LSType* list, const LSIterType& listIter)
+            : list_(list), listIter_(listIter), chIter_()
+        {
+            // Nothing else to do.
+        }
+
+        BaseIterator(LSType* list = nullptr)
+            : list_(list), listIter_(), chIter_()
+        {
+            // Nothing else to do.
+        }
+
+        virtual ~BaseIterator() = default;
+        BaseIterator(const BaseIterator&) = default;
+        BaseIterator& operator=(const BaseIterator&) = default;
+        BaseIterator(BaseIterator&&) = default;
+        BaseIterator& operator=(BaseIterator&&) = default;
+
+        const_reference operator*() const { return *chIter_; }
+
+        const_pointer operator->() const { return &(this->operator*()); }
+
+        template<typename U = TagType>
+        typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, reference>::type
+        operator*() { return *(this->chIter_); }
+
+        template<typename U = TagType>
+        typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, pointer>::type
+        operator->() { return &(this->operator*()); }
+
+        bool operator==(const BaseIterator& other) const {
+            return listIter_ == other.listIter_ && chIter_ == other.chIter_;
+        }
+
+        bool operator!=(const BaseIterator& other) const { return !(this->operator==(other)); }
+
+        BaseIterator& operator++() {
+            // Undefined for ++ on before-begin or past-the-end iterators which
+            // are not dereferenceable.
+            if (chIter_ != NULL_CHUNK_ITER) {
+                chIter_++;
+                if (chIter_ == ch_iter_end()) {
+                    if (++listIter_ == list_iter_end()) {
+                        // Past-the-end: (list_iter_end(), ()).
+                        chIter_ = NULL_CHUNK_ITER;
+                        return *this;
+                    }
+                    chIter_ = ch_iter_begin();
+                }
+            }
+            return *this;
+        }
+
+        BaseIterator operator++(int) { auto it = *this; ++(*this); return it; }
+
+        BaseIterator& operator--() {
+            // Need to support -- on all iterators which can be incremented to,
+            // including all dereferenceable and past-the-end iterators.
+            if (chIter_ != NULL_CHUNK_ITER) {
+                if (chIter_ == ch_iter_begin()) {
+                    if (listIter_-- == list_iter_begin()) {
+                        // Before-begin: (list_iter_begin() - 1, ()).
+                        chIter_ = NULL_CHUNK_ITER;
+                        return *this;
+                    }
+                    chIter_ = ch_iter_end();
+                }
+                chIter_--;
+            } else if (listIter_ == list_iter_end()) {
+                // Past-the-end iterator.
+                listIter_--;
+                chIter_ = ch_iter_end();
+                chIter_--;
+            }
+            return *this;
+        }
+
+        BaseIterator operator--(int) { auto it = *this; --(*this); return it; }
+
+    private:
+        template<typename U = TagType>
+        typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, LSIterType>::type
+        list_iter_begin() { return list_->begin(); }
+
+        template<typename U = TagType>
+        typename std::enable_if<std::is_same<U, ConstIterTagType>::value, LSIterType>::type
+        list_iter_begin() { return list_->cbegin(); }
+
+        template<typename U = TagType>
+        typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, LSIterType>::type
+        list_iter_end() { return list_->end(); }
+
+        template<typename U = TagType>
+        typename std::enable_if<std::is_same<U, ConstIterTagType>::value, LSIterType>::type
+        list_iter_end() { return list_->cend(); }
+
+        template<typename U = TagType>
+        typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, CSIterType>::type
+        ch_iter_begin() { return listIter_->begin(); }
+
+        template<typename U = TagType>
+        typename std::enable_if<std::is_same<U, ConstIterTagType>::value, CSIterType>::type
+        ch_iter_begin() { return listIter_->cbegin(); }
+
+        template<typename U = TagType>
+        typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, CSIterType>::type
+        ch_iter_end() { return listIter_->end(); }
+
+        template<typename U = TagType>
+        typename std::enable_if<std::is_same<U, ConstIterTagType>::value, CSIterType>::type
+        ch_iter_end() { return listIter_->cend(); }
+
+    private:
+        LSType* const list_;
+        LSIterType listIter_;
+        CSIterType chIter_;
+
+        static const CSIterType NULL_CHUNK_ITER;
+    };
+
+public:
+    using iterator = BaseIterator<IterTagType>;
+    using const_iterator = BaseIterator<ConstIterTagType>;
+
+    /**
+     * @name
+     * Iterators.
+     */
+    /**@{*/
+
+    /**
+     * @brief Return an iterator to the beginning.
+     */
+    inline iterator begin() {
+        return empty() ? end() : iterator(&list_, list_.begin(), list_.front().begin());
+    }
+
+    /**
+     * @brief Return an iterator to the end.
+     */
+    inline iterator end() { return iterator(&list_, list_.end()); }
+
+    /**
+     * @brief Return a constant iterator to the beginning.
+     */
+    inline const_iterator cbegin() const {
+        return empty() ? cend() : const_iterator(&list_, list_.cbegin(), list_.front().cbegin());
+    }
+
+    /**
+     * @brief Return a constant iterator to the end.
+     */
+    inline const_iterator cend() const { return const_iterator(&list_, list_.cend()); }
+
+    /**@}*/
 };
 
 template<typename T, size_t C, class Allocator>
 constexpr size_t ChunkList<T, C, Allocator>::CHUNK_CAPACITY;
+
+template<typename T, size_t C, class Allocator>
+template<typename TagType>
+const typename ChunkList<T, C, Allocator>::template BaseIterator<TagType>::CSIterType
+ChunkList<T, C, Allocator>::BaseIterator<TagType>::NULL_CHUNK_ITER = CSIterType();
 
 /**@}*/
 
