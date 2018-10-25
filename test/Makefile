@@ -3,6 +3,7 @@ PROGS = \
 	   byte_buf_test \
 	   chunk_list_test \
 	   exception_test \
+	   nested_iterator_test \
 	   random_test \
 	   stream_test \
 	   string_utils_test \
