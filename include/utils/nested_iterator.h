@@ -209,6 +209,36 @@ public:
     /**@{*/
 
 private:
+
+    /* Direct dereference, top type as vector, array, list, etc.. */
+
+    template<typename TI = TopIterType>
+    typename std::enable_if<
+        std::is_same<B, typename std::iterator_traits<TI>::value_type>::value,
+        typename std::iterator_traits<TI>::value_type&>::type
+    top_iter_deref() { return *topIter_; }
+
+    template<typename TI = TopIterType>
+    typename std::enable_if<
+        std::is_same<B, typename std::iterator_traits<TI>::value_type>::value,
+        const typename std::iterator_traits<TI>::value_type&>::type
+    top_iter_deref() const { return *topIter_; }
+
+    /* Dereference mapped value, top type as unordered_map, map, etc.. */
+
+    template<typename TI = TopIterType>
+    typename std::enable_if<
+        std::is_same<B, typename std::iterator_traits<TI>::value_type::second_type>::value,
+        typename std::iterator_traits<TI>::value_type::second_type&>::type
+    top_iter_deref() { return topIter_->second; }
+
+    template<typename TI = TopIterType>
+    typename std::enable_if<
+        std::is_same<B, typename std::iterator_traits<TI>::value_type::second_type>::value,
+        const typename std::iterator_traits<TI>::value_type::second_type&>::type
+    top_iter_deref() const { return topIter_->second; }
+
+private:
     template<typename U = TagType>
     typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, TopIterType>::type
     top_iter_begin() { return top_->begin(); }
@@ -228,25 +258,33 @@ private:
     template<typename U = TagType>
     typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, BotIterType>::type
     bot_iter_begin() {
-        return topIter_ == top_->end() || topIter_ == --top_->begin() ? NULL_BOT_ITER : topIter_->begin();
+        auto curTopIter = topIter_;
+        if (curTopIter == top_->end() || ++curTopIter == top_->begin()) return NULL_BOT_ITER;
+        return top_iter_deref().begin();
     }
 
     template<typename U = TagType>
     typename std::enable_if<std::is_same<U, ConstIterTagType>::value, BotIterType>::type
     bot_iter_begin() const {
-        return topIter_ == top_->cend() || topIter_ == --top_->cbegin() ? NULL_BOT_ITER : topIter_->cbegin();
+        auto curTopIter = topIter_;
+        if (curTopIter == top_->cend() || ++curTopIter == top_->cbegin()) return NULL_BOT_ITER;
+        return top_iter_deref().cbegin();
     }
 
     template<typename U = TagType>
     typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, BotIterType>::type
     bot_iter_end() {
-        return topIter_ == top_->end() || topIter_ == --top_->begin() ? NULL_BOT_ITER : topIter_->end();
+        auto curTopIter = topIter_;
+        if (curTopIter == top_->end() || ++curTopIter == top_->begin()) return NULL_BOT_ITER;
+        return top_iter_deref().end();
     }
 
     template<typename U = TagType>
     typename std::enable_if<std::is_same<U, ConstIterTagType>::value, BotIterType>::type
     bot_iter_end() const {
-        return topIter_ == top_->cend() || topIter_ == --top_->cbegin() ? NULL_BOT_ITER : topIter_->cend();
+        auto curTopIter = topIter_;
+        if (curTopIter == top_->cend() || ++curTopIter == top_->cbegin()) return NULL_BOT_ITER;
+        return top_iter_deref().cend();
     }
 
 private:

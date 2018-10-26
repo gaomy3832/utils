@@ -7,6 +7,7 @@
 #include <algorithm>  // for std::find_if_not
 #include <deque>
 #include <list>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -17,11 +18,13 @@ protected:
     typedef std::list<std::vector<int>> TypeA;
     typedef std::deque<std::list<UnalignedType>> TypeB;
     typedef std::vector<std::unordered_set<uint64_t>> TypeC;
+    typedef std::unordered_map<uint32_t, std::list<char>> TypeD;
 
     virtual void SetUp() {
         a = new TypeA();
         b = new TypeB();
         c = new TypeC();
+        d = new TypeD();
 
         a->push_back({0, 1, 2});
         a->push_back({3});
@@ -38,23 +41,31 @@ protected:
         c->push_back({100, 101, 102, 103});
         c->push_back({});
         c->push_back({104, 104});  // duplicate.
+
+        (*d)[1001] = {'a'};
+        (*d)[1002] = {'b', 'c', 'd'};
+        (*d)[1003] = {};
+        (*d)[1004] = {'e'};
     }
 
     virtual void TearDown() {
         delete a;
         delete b;
         delete c;
+        delete d;
     }
 
     TypeA* a;
     TypeB* b;
     TypeC* c;
+    TypeD* d;
 
     typedef NestedIterator<TypeA, TypeA::value_type> IterTypeA;
     typedef NestedIterator<TypeA, TypeA::value_type, ConstIterTagType> ConstIterTypeA;
     typedef NestedIterator<TypeB, TypeB::value_type> IterTypeB;
     typedef NestedIterator<TypeC, TypeC::value_type> IterTypeC;
     typedef NestedIterator<TypeC, TypeC::value_type, ConstIterTagType> ConstIterTypeC;
+    typedef NestedIterator<TypeD, TypeD::mapped_type> IterTypeD;
 };
 
 
@@ -233,5 +244,18 @@ TEST_F(NestedIteratorTest, validation) {
     ASSERT_EQ(beg, IterTypeA(a, a->begin(), a->begin()->begin()));
     ASSERT_EQ(&lastVal1, &(*last1));
     ASSERT_EQ(&lastVal2, &(*last2));
+}
+
+TEST_F(NestedIteratorTest, mappedType) {
+    auto itD = IterTypeD(d, d->begin(), d->begin()->second.begin());
+    auto itDEnd = IterTypeD(d);
+    int i = 0;
+    while (itD != itDEnd) {
+        ASSERT_LE('a', *itD);
+        ASSERT_LE(*itD, 'e');
+        itD++;
+        i++;
+    }
+    ASSERT_EQ(5, i);
 }
 
