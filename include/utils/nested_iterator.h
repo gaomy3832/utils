@@ -5,6 +5,7 @@
 #ifndef UTILS_NESTED_ITERATOR_H_
 #define UTILS_NESTED_ITERATOR_H_
 
+#include <iterator>
 #include <type_traits>  // for std::enable_if, std::conditional, std::is_same
 
 /**
@@ -174,7 +175,12 @@ public:
 
     NestedIterator operator++(int) { auto it = *this; ++(*this); return it; }
 
-    NestedIterator& operator--() {
+    template<typename TI = TopIterType, typename BI = BotIterType>
+    typename std::enable_if<
+        std::is_base_of<std::bidirectional_iterator_tag, typename std::iterator_traits<TI>::iterator_category>::value &&
+        std::is_base_of<std::bidirectional_iterator_tag, typename std::iterator_traits<BI>::iterator_category>::value,
+        NestedIterator&>::type
+    operator--() {
         // Undefined on before-begin or begin iterators, which cannot be
         // incremented to from dereferenceable iterators.
         // For a before-begin iterator, -- keeps.
@@ -193,7 +199,12 @@ public:
         return *this;
     }
 
-    NestedIterator operator--(int) { auto it = *this; --(*this); return it; }
+    template<typename TI = TopIterType, typename BI = BotIterType>
+    typename std::enable_if<
+        std::is_base_of<std::bidirectional_iterator_tag, typename std::iterator_traits<TI>::iterator_category>::value &&
+        std::is_base_of<std::bidirectional_iterator_tag, typename std::iterator_traits<BI>::iterator_category>::value,
+        NestedIterator>::type
+    operator--(int) { auto it = *this; --(*this); return it; }
 
     /**@{*/
 
