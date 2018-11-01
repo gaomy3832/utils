@@ -1,13 +1,13 @@
 /*
- * Copyright 2016 Mingyu Gao
+ * Copyright 2018 Mingyu Gao
  *
  */
 #ifndef UTILS_STREAM_H_
 #define UTILS_STREAM_H_
 
-#include <algorithm>    // for std::sort
-#include <utility>      // for std::swap
-#include <vector>
+#include <atomic>
+#include <utility>  // for std::pair
+#include "utils/chunk_list.h"
 
 /**
  * @addtogroup containers
@@ -17,118 +17,112 @@
 
 /**
  * @brief
- * Generic stream of data.
+ * Lock-free stream of data between a producer-consumer pair.
  */
-template<typename Data>
+template<typename T, size_t C = 65536, class Allocator = std::allocator<T>>
 class Stream {
+private:
+    // Implemented using ChunkList to avoid data reallocation.
+    using StorageType = ChunkList<T, C, Allocator>;
+
 public:
-    typedef typename std::vector<Data>::iterator Iter;
-    typedef typename std::vector<Data>::const_iterator ConstIter;
+    using value_type = T;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_reference = const T&;
+    using iterator = typename StorageType::iterator;
+    using const_iterator = typename StorageType::const_iterator;
 
 public:
     /**
      * @brief
-     * Initialize stream.
-     *
-     * @param num    initial capacity in number of elements.
+     * Initialize a stream.
      */
-    explicit Stream(size_t num = 16) {
-        stream_.reserve(num);
+    Stream()
+        : data_(), getPos_(0), putPos_(0)
+    {
+        // A dummy element.
+        data_.resize(1);
+        getIter_ = data_.cbegin();
     }
 
     ~Stream() {}
 
-    /**
-     * @name
-     * Copy and move.
-     */
-    /**@{*/
+    Stream(const Stream&) = delete;
+    Stream& operator=(const Stream&) = delete;
 
-    Stream(const Stream<Data>&) = delete;
+    Stream(Stream&& other) {
+        data_.swap(other.data_);
+        getPos_ = other.getPos_;
+        putPos_.store(other.putPos_.load(std::memory_order_acquire), std::memory_order_release);
+        getIter_ = other.getIter_;
 
-    Stream<Data>& operator=(const Stream<Data>&) = delete;
-
-    Stream(Stream<Data>&& s) {
-        stream_.swap(s.stream_);
+        other.clear();
     }
 
-    Stream<Data>& operator=(Stream<Data>&& s) {
+    Stream& operator=(Stream&& other) {
         // Avoid self assign.
-        if (this == &s) return *this;
-        stream_.swap(s.stream_);
+        if (this == &other) return *this;
+
+        data_.swap(other.data_);
+        getPos_ = other.getPos_;
+        putPos_.store(other.putPos_.load(std::memory_order_acquire), std::memory_order_release);
+        getIter_ = other.getIter_;
+
+        other.clear();
+
         return *this;
     }
 
-    /**@}*/
-
     /**
      * @name
-     * Member access.
+     * Size access.
      */
     /**@{*/
 
     /**
-     * @return  raw pointer to the data.
+     * @brief Check whether the stream is empty.
      */
-    Data* data() { return stream_.data(); }
+    inline bool empty() const { return getPos_ == putPos_; }
 
     /**
-     * @return  const raw pointer to the data.
+     * @brief Return the number of elements.
      */
-    const Data* data() const { return stream_.data(); }
+    inline size_type size() const { return putPos_ - getPos_; }
 
     /**
-     * @return  stream size in number of elements.
+     * @brief Return the stream size in bytes.
      */
-    size_t size() const { return stream_.size(); }
-
-    /**
-     * @return  stream size in bytes.
-     */
-    size_t byte_size() const { return size() * sizeof(Data); }
-
-    /**
-     * @return  stream capacity in number of elements.
-     */
-    size_t capacity() const { return stream_.capacity(); }
+    inline size_type byte_size() const { return size() * sizeof(value_type); }
 
     /**@}*/
 
     /**
      * @name
-     * Iterator.
+     * Iterators.
      */
     /**@{*/
 
     /**
-     * @return  iterator to the elements in the stream.
+     * @brief Return a range of elements to get from the stream.
      */
-    Iter begin() { return stream_.begin(); }
-
-    /**
-     * @return  end of the iterator to the elements in the stream.
-     */
-    Iter end() { return stream_.end(); }
-
-    /**
-     * @return  const iterator to the elements in the stream.
-     */
-    ConstIter begin() const { return stream_.begin(); }
-
-    /**
-     * @return  end of the const iterator to the elements in the stream.
-     */
-    ConstIter end() const { return stream_.end(); }
-
-    /**
-     * @return  const iterator to the elements in the stream.
-     */
-    ConstIter cbegin() const { return stream_.cbegin(); }
-
-    /**
-     * @return  end of the const iterator to the elements in the stream.
-     */
-    ConstIter cend() const { return stream_.cend(); }
+    std::pair<const_iterator, const_iterator> get_range() {
+        // Atomically acquire the current stream end.
+        auto pos = putPos_.load(std::memory_order_acquire);
+        assert(pos < data_.size());
+        auto it = data_.cend();
+        const auto* ptr = &data_.at(pos);
+        while (&(*(--it)) != ptr) {}
+        // Now the iterator points the to the stream end. Return the interval
+        // and move the get position.
+        auto range = std::make_pair(getIter_, it);
+        getIter_ = it;
+        getPos_ = pos;
+        return range;
+    }
 
     /**@}*/
 
@@ -139,69 +133,47 @@ public:
     /**@{*/
 
     /**
-     * @brief
-     * Reset stream by clearing all elements.
-     *
-     * Initialize capacity to \c num elements.
-     *
-     * Warning: non-binding.
-     *
-     * @param num    reserved capacity in number of elements.
+     * @brief Clear the contents.
      */
-    void reset(size_t num = 16) {
-        if (num != stream_.capacity()) {
-            // Non-binding request, as shrink_to_fit() is non-binding.
-            stream_.resize(num);
-            stream_.shrink_to_fit();
-        }
-        stream_.clear();
+    void clear() {
+        data_.resize(1);
+        getPos_ = 0;
+        putPos_ = 0;
+        getIter_ = data_.cbegin();
     }
 
     /**
-     * @brief
-     * Swap this stream with another stream \c s.
-     *
-     * @param s  the other stream to be swapped.
+     * @brief Put an element to the stream.
      */
-    void swap(Stream<Data>& s) {
-        stream_.swap(s.stream_);
+    void put(const value_type& value) {
+        data_.back() = value;
+        data_.resize(data_.size() + 1);
+        auto pos = putPos_.fetch_add(1, std::memory_order_release);
+        assert(pos + 1 == data_.size() - 1);
     }
 
     /**
-     * @brief
-     * Append an element \c d to the stream.
-     *
-     * @param d  the element to be appended.
+     * @brief Put an element to the stream.
      */
-    void put(const Data& d) {
-        // The growth of the STL vector is implementation dependent, but it
-        // usually grows exponentially as a nearly-optimal solution.
-        stream_.push_back(d);
-    }
-
-    /**
-     * @brief
-     * Append an element \c d to the stream.
-     *
-     * @param d  the element to be appended.
-     */
-    void put(Data&& d) {
-        stream_.push_back(std::forward<Data>(d));
-    }
-
-    /**
-     * @brief
-     * Sort the elements in the stream.
-     */
-    void sort() {
-        std::sort(stream_.begin(), stream_.end());
+    void put(value_type&& value) {
+        data_.back() = std::move(std::forward<value_type>(value));
+        data_.resize(data_.size() + 1);
+        auto pos = putPos_.fetch_add(1, std::memory_order_release);
+        assert(pos + 1 == data_.size() - 1);
     }
 
     /**@}*/
 
 private:
-    // Implemented using std::vector.
-    std::vector<Data> stream_;
+    StorageType data_;
+
+    // Points to the first element that has not been got.
+    size_type getPos_;
+    // Points to a dummy element after the last one that has been put.
+    std::atomic<size_type> putPos_;
+
+    // The iterator pointing to the get position.
+    const_iterator getIter_;
 };
 
 /**@}*/
