@@ -288,7 +288,7 @@ private:
     }
 
 private:
-    TopType* const top_;
+    TopType* top_;
     TopIterType topIter_;
     BotIterType botIter_;
 
