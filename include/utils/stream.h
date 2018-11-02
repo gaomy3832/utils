@@ -144,22 +144,30 @@ public:
 
     /**
      * @brief Put an element to the stream.
+     *
+     * If relaxed, the added element is not guaranteed to be visible to the consumer.
      */
-    void put(const value_type& value) {
+    void put(const value_type& value, bool relaxed = false) {
         data_.back() = value;
         data_.resize(data_.size() + 1);
-        auto pos = putPos_.fetch_add(1, std::memory_order_release);
-        assert(pos + 1 == data_.size() - 1);
+        auto numPending = data_.size() - 1 - putPos_.load(std::memory_order_relaxed);
+        if (!relaxed || numPending > 16) {
+            putPos_.fetch_add(numPending, std::memory_order_release);
+        }
     }
 
     /**
      * @brief Put an element to the stream.
+     *
+     * If relaxed, the added element is not guaranteed to be visible to the consumer.
      */
-    void put(value_type&& value) {
+    void put(value_type&& value, bool relaxed = false) {
         data_.back() = std::move(std::forward<value_type>(value));
         data_.resize(data_.size() + 1);
-        auto pos = putPos_.fetch_add(1, std::memory_order_release);
-        assert(pos + 1 == data_.size() - 1);
+        auto numPending = data_.size() - 1 - putPos_.load(std::memory_order_relaxed);
+        if (!relaxed || numPending > 16) {
+            putPos_.fetch_add(numPending, std::memory_order_release);
+        }
     }
 
     /**@}*/

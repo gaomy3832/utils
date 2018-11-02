@@ -158,6 +158,31 @@ TEST_F(StreamTest, put) {
     ASSERT_EQ(range.first, range.second);
 }
 
+TEST_F(StreamTest, putRelaxed) {
+    std::vector<uint64_t> avec;
+    std::vector<uint8_t> bvec;
+
+    for (size_t idx = 0; idx < 65536; idx++) {
+        strm1->put({idx, static_cast<uint8_t>(idx % 128)}, idx != 65535);
+        avec.push_back(idx);
+        bvec.push_back(static_cast<uint8_t>(idx % 128));
+    }
+
+    size_t n = 0;
+
+    auto range = strm1->get_range();
+
+    auto ita = avec.begin();
+    auto itb = bvec.begin();
+    for (auto it = range.first; it != range.second; ++it, ++ita, ++itb, ++n) {
+        ASSERT_NE(avec.end(), ita);
+        ASSERT_NE(bvec.end(), itb);
+        ASSERT_EQ(*ita, (*it).a);
+        ASSERT_EQ(*itb, (*it).b);
+    }
+    ASSERT_EQ(65536, n);
+}
+
 TEST_F(StreamTest, concurrency) {
     ASSERT_TRUE(strm1->empty());
 
@@ -166,6 +191,42 @@ TEST_F(StreamTest, concurrency) {
     auto producer = [&]() {
         for (size_t i = 0; i < size; i++) {
             strm1->put({i, static_cast<uint8_t>(i % 31)});
+            std::this_thread::sleep_for(std::chrono::microseconds(std::rand() % 10));
+        }
+    };
+
+    auto consumer = [&]() {
+        size_t recv = 0;
+        while (recv < size) {
+            auto range = strm1->get_range();
+            for (auto it = range.first; it != range.second; ++it) {
+                ASSERT_EQ(recv, it->a);
+                ASSERT_EQ(recv % 31, it->b);
+                recv++;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    };
+
+    thread_t prod(producer);
+    thread_t cons(consumer);
+
+    prod.join();
+    cons.join();
+
+    ASSERT_TRUE(strm1->empty());
+    auto range = strm1->get_range();
+    ASSERT_EQ(range.first, range.second);
+}
+
+TEST_F(StreamTest, concurrencyRelaxed) {
+    ASSERT_TRUE(strm1->empty());
+
+    constexpr size_t size = 128 * 1024 - 3;
+
+    auto producer = [&]() {
+        for (size_t i = 0; i < size; i++) {
+            strm1->put({i, static_cast<uint8_t>(i % 31)}, i != size - 1);
             std::this_thread::sleep_for(std::chrono::microseconds(std::rand() % 10));
         }
     };
