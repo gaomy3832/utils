@@ -9,7 +9,7 @@
 #include <list>
 #include <stdexcept>
 #include <type_traits>  // for std::is_standard_layout
-#include <utility>  // for std::swap
+#include <utility>  // for std::swap, std::pair
 #include "utils/nested_iterator.h"
 
 /**
@@ -464,6 +464,46 @@ public:
      * @brief Return a constant iterator to the end.
      */
     inline const_iterator cend() const { return const_iterator(&list_); }
+
+    /**
+     * @brief Return range of a chunk as a pair of iterators.
+     */
+    inline std::pair<iterator, iterator> chunk_range(size_t idx) {
+        auto lastChunkIdx = chunk_count() - 1;
+        if (empty() || idx > lastChunkIdx) {
+            return std::make_pair(end(), end());
+        } else if (idx == lastChunkIdx) {
+            auto listIter = list_.end();
+            listIter--;
+            return std::make_pair(iterator(&list_, listIter, listIter->begin()), end());
+        }
+        auto listIter = list_.begin();
+        while (idx--) ++listIter;
+        auto first = iterator(&list_, listIter, listIter->begin());
+        ++listIter;
+        auto second = iterator(&list_, listIter, listIter->begin());
+        return std::make_pair(first, second);
+    }
+
+    /**
+     * @brief Return range of a chunk as a pair of const iterators.
+     */
+    inline std::pair<const_iterator, const_iterator> chunk_range(size_t idx) const {
+        auto lastChunkIdx = chunk_count() - 1;
+        if (empty() || idx > lastChunkIdx) {
+            return std::make_pair(cend(), cend());
+        } else if (idx == lastChunkIdx) {
+            auto listIter = list_.cend();
+            listIter--;
+            return std::make_pair(iterator(&list_, listIter, listIter->cbegin()), cend());
+        }
+        auto listIter = list_.cbegin();
+        while (idx--) ++listIter;
+        auto first = iterator(&list_, listIter, listIter->cbegin());
+        ++listIter;
+        auto second = iterator(&list_, listIter, listIter->cbegin());
+        return std::make_pair(first, second);
+    }
 
     /**@}*/
 };

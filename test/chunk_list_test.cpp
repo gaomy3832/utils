@@ -596,3 +596,29 @@ TEST_F(ChunkListTest, popBackException) {
     ASSERT_ANY_THROW(cl2->pop_back());
 }
 
+TEST_F(ChunkListTest, chunkRange) {
+    constexpr size_t chunk_count = 10;
+
+    cl1->clear();
+    for (size_t i = 0; i < cl1->CHUNK_CAPACITY * chunk_count - 20; i++) {
+        cl1->push_back(i);
+    }
+    ASSERT_EQ(chunk_count, cl1->chunk_count());
+
+    for (size_t c = 0; c < chunk_count; c++) {
+        auto rng = cl1->chunk_range(c);
+        size_t cnt = 0;
+        for (auto it = rng.first; it != rng.second; ++it) {
+            ASSERT_EQ(c * cl1->CHUNK_CAPACITY + cnt, *it);
+            cnt++;
+        }
+        if (c == chunk_count - 1) cnt += 20;
+        ASSERT_EQ(cl1->CHUNK_CAPACITY, cnt);
+    }
+
+    for (size_t c = chunk_count; c < 2 * chunk_count; c++) {
+        auto rng = cl1->chunk_range(c);
+        ASSERT_EQ(rng.first, rng.second);
+    }
+}
+
