@@ -153,8 +153,11 @@ TEST_F(ChunkTest, iterators) {
     for (auto it = chk->cbegin(); it != chk->cend(); it++) cnt++;
     ASSERT_EQ(chk->size(), cnt);
 
-    for (auto it = chk->cbegin(); it != chk->cend(); it++) {
-        ASSERT_EQ(2, *it);
+    auto it1 = chk->cbegin();
+    decltype(it1) it2 = chk->begin();
+    for (; it1 != chk->cend() && it2 != chk->end(); it1++, it2++) {
+        ASSERT_EQ(2, *it1);
+        ASSERT_EQ(it1, it2);
     }
 }
 
@@ -443,8 +446,11 @@ TEST_F(ChunkListTest, iterators) {
     for (auto it = cl->cbegin(); it != cl->cend(); it++) cnt++;
     ASSERT_EQ(cl->size(), cnt);
 
-    for (auto it = cl->cbegin(); it != cl->cend(); ++it) {
-        ASSERT_EQ(2, *it);
+    auto it1 = cl->cbegin();
+    decltype(it1) it2 = cl->begin();
+    for (; it1 != cl->cend() && it2 != cl->end(); ++it1, ++it2) {
+        ASSERT_EQ(2, *it1);
+        ASSERT_EQ(it1, it2);
     }
 
     cl2->clear();

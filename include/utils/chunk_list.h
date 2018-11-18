@@ -102,6 +102,10 @@ public:
 
         inline iterator end() { return storage_.begin() + size_; }
 
+        inline const_iterator begin() const { return storage_.begin(); }
+
+        inline const_iterator end() const { return storage_.begin() + size_; }
+
         inline const_iterator cbegin() const { return storage_.cbegin(); }
 
         inline const_iterator cend() const { return storage_.cbegin() + size_; }
@@ -454,6 +458,16 @@ public:
      * @brief Return an iterator to the end.
      */
     inline iterator end() { return iterator(&list_); }
+
+    /**
+     * @brief Return a constant iterator to the beginning.
+     */
+    inline const_iterator begin() const { return const_iterator(&list_, list_.cbegin(), list_.cbegin()->cbegin()); }
+
+    /**
+     * @brief Return a constant iterator to the end.
+     */
+    inline const_iterator end() const { return const_iterator(&list_); }
 
     /**
      * @brief Return a constant iterator to the beginning.
