@@ -85,6 +85,15 @@ public:
             // Nothing else to do.
         }
 
+        /**
+         * @brief Default null iterator.
+         */
+        iterator()
+            : rc_(nullptr), pos_(0), it_()
+        {
+            // Nothing else to do.
+        }
+
         ~iterator() = default;
         iterator(const iterator&) = default;
         iterator& operator=(const iterator&) = default;
