@@ -31,30 +31,6 @@ struct ConstIterTagType final {};
 template<typename T, typename B, typename TagType = IterTagType>
 class NestedIterator {
 public:
-    /**
-     * @name
-     * Iterator type traits.
-     */
-    /**@{*/
-
-    using value_type = typename B::value_type;
-    using difference_type = typename B::difference_type;
-    using pointer = typename B::pointer;
-    using reference = typename B::reference;
-    using iterator_category = std::bidirectional_iterator_tag;
-
-    /**@}*/
-
-public:
-    /**
-     * @name
-     * Other type defines.
-     */
-    /**@{*/
-
-    using const_pointer = typename B::const_pointer;
-    using const_reference = typename B::const_reference;
-
     using TopType = typename std::conditional<std::is_same<TagType, ConstIterTagType>::value,
           const T, T>::type;
 
@@ -66,6 +42,22 @@ public:
 
     using BotIterType = typename std::conditional<std::is_same<TagType, ConstIterTagType>::value,
           typename B::const_iterator, typename B::iterator>::type;
+
+public:
+    /**
+     * @name
+     * Iterator type traits.
+     */
+    /**@{*/
+
+    using value_type = typename std::iterator_traits<BotIterType>::value_type;
+    using difference_type = typename std::iterator_traits<BotIterType>::difference_type;
+    using pointer = typename std::iterator_traits<BotIterType>::pointer;
+    using reference = typename std::iterator_traits<BotIterType>::reference;
+    using iterator_category = typename std::conditional<
+        std::is_base_of<std::bidirectional_iterator_tag, typename std::iterator_traits<TopIterType>::iterator_category>::value &&
+        std::is_base_of<std::bidirectional_iterator_tag, typename std::iterator_traits<BotIterType>::iterator_category>::value,
+        std::bidirectional_iterator_tag, std::forward_iterator_tag>::type;
 
     /**@}*/
 
@@ -120,17 +112,9 @@ public:
      */
     /**@{*/
 
-    const_reference operator*() const { return *botIter_; }
+    reference operator*() const { return *botIter_; }
 
-    const_pointer operator->() const { return &(this->operator*()); }
-
-    template<typename U = TagType>
-    typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, reference>::type
-    operator*() { return *botIter_; }
-
-    template<typename U = TagType>
-    typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, pointer>::type
-    operator->() { return &(this->operator*()); }
+    pointer operator->() const { return &(this->operator*()); }
 
     /**@}*/
 
@@ -215,13 +199,7 @@ private:
     template<typename TI = TopIterType>
     typename std::enable_if<
         std::is_same<B, typename std::iterator_traits<TI>::value_type>::value,
-        typename std::iterator_traits<TI>::value_type&>::type
-    top_iter_deref() { return *topIter_; }
-
-    template<typename TI = TopIterType>
-    typename std::enable_if<
-        std::is_same<B, typename std::iterator_traits<TI>::value_type>::value,
-        const typename std::iterator_traits<TI>::value_type&>::type
+        typename std::iterator_traits<TI>::reference>::type
     top_iter_deref() const { return *topIter_; }
 
     /* Dereference mapped value, top type as unordered_map, map, etc.. */
@@ -239,52 +217,20 @@ private:
     top_iter_deref() const { return topIter_->second; }
 
 private:
-    template<typename U = TagType>
-    typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, TopIterType>::type
-    top_iter_begin() { return top_->begin(); }
+    TopIterType top_iter_begin() { return top_->begin(); }
 
-    template<typename U = TagType>
-    typename std::enable_if<std::is_same<U, ConstIterTagType>::value, TopIterType>::type
-    top_iter_begin() const { return top_->cbegin(); }
+    TopIterType top_iter_end() { return top_->end(); }
 
-    template<typename U = TagType>
-    typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, TopIterType>::type
-    top_iter_end() { return top_->end(); }
-
-    template<typename U = TagType>
-    typename std::enable_if<std::is_same<U, ConstIterTagType>::value, TopIterType>::type
-    top_iter_end() const { return top_->cend(); }
-
-    template<typename U = TagType>
-    typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, BotIterType>::type
-    bot_iter_begin() {
+    BotIterType bot_iter_begin() {
         auto curTopIter = topIter_;
         if (curTopIter == top_->end() || ++curTopIter == top_->begin()) return NULL_BOT_ITER;
         return top_iter_deref().begin();
     }
 
-    template<typename U = TagType>
-    typename std::enable_if<std::is_same<U, ConstIterTagType>::value, BotIterType>::type
-    bot_iter_begin() const {
-        auto curTopIter = topIter_;
-        if (curTopIter == top_->cend() || ++curTopIter == top_->cbegin()) return NULL_BOT_ITER;
-        return top_iter_deref().cbegin();
-    }
-
-    template<typename U = TagType>
-    typename std::enable_if<!std::is_same<U, ConstIterTagType>::value, BotIterType>::type
-    bot_iter_end() {
+    BotIterType bot_iter_end() {
         auto curTopIter = topIter_;
         if (curTopIter == top_->end() || ++curTopIter == top_->begin()) return NULL_BOT_ITER;
         return top_iter_deref().end();
-    }
-
-    template<typename U = TagType>
-    typename std::enable_if<std::is_same<U, ConstIterTagType>::value, BotIterType>::type
-    bot_iter_end() const {
-        auto curTopIter = topIter_;
-        if (curTopIter == top_->cend() || ++curTopIter == top_->cbegin()) return NULL_BOT_ITER;
-        return top_iter_deref().cend();
     }
 
 private:
