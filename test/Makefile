@@ -5,6 +5,7 @@ PROGS = \
 	   exception_test \
 	   nested_iterator_test \
 	   random_test \
+	   range_chain_test \
 	   stream_test \
 	   string_utils_test \
 	   parallel_test \
