@@ -71,7 +71,7 @@ public:
          * @brief Construct an iterator that starts at one of the ranges.
          */
         iterator(const RangeChain* rc, size_t pos)
-            : iterator(rc, pos, pos >= rc->ranges_.size() ? IterType() : rc->ranges_.at(pos).first)
+            : iterator(rc, pos, pos >= rc->ranges_.size() ? NULL_ITER : rc->ranges_.at(pos).first)
         {
             // Nothing else to do.
         }
@@ -80,7 +80,7 @@ public:
          * @brief Construct a past-the-end iterator.
          */
         explicit iterator(const RangeChain* rc)
-            : iterator(rc, rc->ranges_.size())
+            : rc_(rc), pos_(rc->ranges_.size()), it_()
         {
             // Nothing else to do.
         }
@@ -135,7 +135,7 @@ public:
         /**@{*/
 
         iterator& operator++() {
-            if (it_ != IterType()) it_++;
+            if (it_ != NULL_ITER) it_++;
             while (it_ == curr_range_end()) {
                 // Reach the end of the current range. Jump to the next range.
                 bool stop = (pos_ >= rc_->ranges_.size());
@@ -160,7 +160,7 @@ public:
                 it_ = curr_range_end();
                 if (stop) break;
             }
-            if (it_ != IterType()) it_--;
+            if (it_ != NULL_ITER) it_--;
             return *this;
         }
 
@@ -177,7 +177,7 @@ public:
             try {
                 return rc_->ranges_.at(pos_).first;
             } catch (...) {
-                return IterType();
+                return NULL_ITER;
             }
         }
 
@@ -185,7 +185,7 @@ public:
             try {
                 return rc_->ranges_.at(pos_).second;
             } catch (...) {
-                return IterType();
+                return NULL_ITER;
             }
         }
 
@@ -250,12 +250,12 @@ public:
     /**
      * @brief Return an iterator to the beginning.
      */
-    inline iterator begin() { return iterator(this, 0); }
+    inline iterator begin() const { return iterator(this, 0); }
 
     /**
      * @brief Return an iterator to the end.
      */
-    inline iterator end() { return iterator(this); }
+    inline iterator end() const { return iterator(this); }
 
     /**@}*/
 
