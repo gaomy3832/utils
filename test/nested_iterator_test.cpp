@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "utils/nested_iterator.h"
 #include <algorithm>  // for std::find_if_not
+#include <array>
 #include <deque>
 #include <list>
 #include <unordered_map>

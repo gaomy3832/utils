@@ -433,7 +433,7 @@ public:
     /**@}*/
 
 private:
-    using ChunkListStorageType = std::list<Chunk, Allocator>;
+    using ChunkListStorageType = std::list<Chunk, typename Allocator::template rebind<Chunk>::other>;
 
 private:
     ChunkListStorageType list_;

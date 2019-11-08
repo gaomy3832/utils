@@ -316,7 +316,8 @@ TEST_F(ChunkListTest, popBackAndSizeAndChunkCount) {
 TEST_F(ChunkListTest, resizeAndSizeAndChunkCount) {
     ASSERT_EQ(cl1->size(), cl1->CHUNK_CAPACITY + 3);
     ASSERT_EQ(cl1->chunk_count(), 2);
-    std::array<int, cl1->CHUNK_CAPACITY + 3> contents;
+    std::array<int,
+        std::remove_reference<decltype(*cl1)>::type::CHUNK_CAPACITY + 3> contents;
     std::copy(cl1->begin(), cl1->end(), contents.begin());
 
     cl1->resize(10);
@@ -481,7 +482,8 @@ TEST_F(ChunkListTest, iteratorIncDec) {
     }
 
     ASSERT_EQ(cl1->size(), cl1->CHUNK_CAPACITY + 3);
-    std::array<int, cl1->CHUNK_CAPACITY + 3> contents;
+    std::array<int,
+        std::remove_reference<decltype(*cl1)>::type::CHUNK_CAPACITY + 3> contents;
     std::copy(cl1->begin(), cl1->end(), contents.begin());
 
     ASSERT_EQ(cl1->end(), pre);

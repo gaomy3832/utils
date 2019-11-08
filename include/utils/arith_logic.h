@@ -50,14 +50,17 @@ template<typename T> inline uint32_t cilog2(T val) {
     return !val || isPow2(val) ? m : m + 1;
 }
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 // Only specializations of unsigned types (no calling these with ints)
 // __builtin_clz is undefined for 0 (internally, this uses bsr in x86-64)
-template<> uint32_t ilog2<uint32_t>(uint32_t val) {
-    return val? 31 - __builtin_clz(val) : 0;
+template<> uint32_t ilog2<unsigned int>(unsigned int val) {
+    return val? sizeof(unsigned int) * 8 - 1 - __builtin_clz(val) : 0;
 }
-template<> uint32_t ilog2<uint64_t>(uint64_t val) {
-    return val? 63 - __builtin_clzl(val) : 0;
+template<> uint32_t ilog2<unsigned long>(unsigned long val) {
+    return val? sizeof(unsigned long) * 8 - 1 - __builtin_clzl(val) : 0;
+}
+template<> uint32_t ilog2<unsigned long long>(unsigned long long val) {
+    return val? sizeof(unsigned long long) * 8 - 1 - __builtin_clzll(val) : 0;
 }
 #endif
 

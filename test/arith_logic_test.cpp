@@ -20,6 +20,9 @@ TEST(ArithLogic, ilog2) {
     ASSERT_EQ(63, ilog2(-1uL));
 
     ASSERT_EQ(0, ilog2(0u));
+
+    ASSERT_EQ(30, ilog2((uint32_t)(1024u*1024*1024)));
+    ASSERT_EQ(50, ilog2((uint64_t)(1024uL*1024*1024*1024*1024)));
 }
 
 TEST(ArithLogic, cilog2) {
@@ -37,6 +40,9 @@ TEST(ArithLogic, cilog2) {
     ASSERT_EQ(64, cilog2(-1uL));
 
     ASSERT_EQ(0, cilog2(0u));
+
+    ASSERT_EQ(30, ilog2((uint32_t)(1024u*1024*1024)));
+    ASSERT_EQ(50, ilog2((uint64_t)(1024uL*1024*1024*1024*1024)));
 }
 
 TEST(ArithLogic, isPow2) {

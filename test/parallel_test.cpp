@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "utils/parallel.h"
 #include <algorithm>        // for std::fill
+#include <array>
 
 constexpr uint32_t thCnt = 8;
 constexpr uint32_t itCnt = 4;
