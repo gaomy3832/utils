@@ -14,7 +14,12 @@ PROGS = \
 BINDIR = bin
 
 GTEST ?= googletest
-GTESTVER = 1.7.0
+GTESTVER = 1.10.0
+GTEST_BASE = $(GTEST)/googletest
+GTEST_BUILD_DIR = build
+GTEST_INC_PATH = $(GTEST_BASE)/include
+GTEST_LIB_PATH = $(GTEST_BASE)/$(GTEST_BUILD_DIR)/lib
+GTEST_LIB = $(GTEST_LIB_PATH)/libgtest_main.a -lgtest
 
 BINS = $(addprefix $(BINDIR)/,$(PROGS))
 
@@ -28,8 +33,9 @@ DEPS = $(addsuffix .d,$(PROGS))
 CXXFLAGS = -Wall -Wextra -pedantic -std=c++11 \
 		   -O3 -g \
 		   -I../include
-CXXFLAGS += -I$(GTEST)/include
-LDFLAGS += $(GTEST)/make/gtest_main.a -lpthread
+CXXFLAGS += -I$(GTEST_INC_PATH) -Wno-sign-compare
+LDFLAGS += -L$(GTEST_LIB_PATH)
+LDFLAGS += $(GTEST_LIB) -lpthread
 
 %.o: %.cpp | $(GTEST)
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -MP -MMD
@@ -45,7 +51,7 @@ $(GTEST):
 	@wget https://github.com/google/googletest/archive/release-$(GTESTVER).tar.gz; \
 		tar zxvf release-$(GTESTVER).tar.gz && rm release-$(GTESTVER).tar.gz; \
 		mv googletest-release-$(GTESTVER) $(GTEST); \
-    	cd $(GTEST); cd make; make
+		cd $(GTEST_BASE); mkdir $(GTEST_BUILD_DIR) && cd $(GTEST_BUILD_DIR); cmake -DCMAKE_CXX_STANDARD=11 ..; make
 
 
 clean:
