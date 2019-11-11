@@ -57,11 +57,11 @@ public:
      */
     /**@{*/
 
-    value_type value() const { return value_; }
+    const value_type& value() const { return value_; }
 
     value_type& value() { return value_; }
 
-    operator value_type() const { return value_; }
+    operator const value_type&() const { return value_; }
 
     operator value_type&() { return value_; }
 
