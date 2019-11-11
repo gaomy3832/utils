@@ -4,6 +4,7 @@ PROGS = \
 	   chunk_list_test \
 	   exception_test \
 	   nested_iterator_test \
+	   padded_test \
 	   random_test \
 	   range_chain_test \
 	   stream_test \
